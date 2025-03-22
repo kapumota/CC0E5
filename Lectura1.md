@@ -36,7 +36,7 @@ Los **algoritmos heurísticos** utilizan técnicas basadas en la experiencia o e
 
 #### 3.2 Algoritmos probabilísticos y aleatorios
 
-Los **algoritmos probabilísticos** incorporan elementos de aleatorización en sus procesos de decisión, basándose en la probabilidad para tomar decisiones durante la ejecución. Esto puede mejorar el rendimiento en promedio o simplificar el diseño del algoritmo. Un ejemplo es el algoritmo de Quicksort con selección aleatoria del pivote, que mejora la probabilidad de obtener un rendimiento cercano al óptimo.  
+Los **algoritmos probabilísticos** incorporan elementos de aleatorización en sus procesos de decisión, basándose en la probabilidad para tomar decisiones durante la ejecución. Esto puede mejorar el rendimiento en promedio o simplificar el diseño del algoritmo. Un ejemplo es el algoritmo de quicksort con selección aleatoria del pivote, que mejora la probabilidad de obtener un rendimiento cercano al óptimo.  
 Los **algoritmos aleatorios** son un subconjunto en el que se usan números aleatorios para influir en la trayectoria del algoritmo. En el balanceo de árboles de búsqueda, por ejemplo, se utilizan técnicas de aleatorización para evitar la degradación del rendimiento en casos adversos.
 
 Un caso de estudio interesante es el uso de aleatorización en la construcción de _treaps_. Un **treap** es una estructura que combina un árbol binario de búsqueda (BST) con un heap. Cada nodo tiene dos claves: una clave de búsqueda y una prioridad generada de forma aleatoria. La propiedad del BST se mantiene para la clave de búsqueda, y la propiedad del heap se mantiene para la prioridad. Esto garantiza un balanceo probabilístico del árbol, obteniendo un rendimiento promedio de operaciones de inserción, eliminación y búsqueda en tiempo O(log n).
@@ -287,11 +287,11 @@ def treap_insert(root, key):
     return root
 
 # Ejemplo de uso:
-if __name__ == '__main__':
-    keys = [50, 30, 70, 20, 40, 60, 80]
-    treap_root = None
-    for k in keys:
-        treap_root = treap_insert(treap_root, k)
+
+keys = [50, 30, 70, 20, 40, 60, 80]
+treap_root = None
+for k in keys:
+    treap_root = treap_insert(treap_root, k)
 ```
 
 En este código, se observa cómo cada nodo del treap recibe una prioridad aleatoria que, junto con la clave, permite mantener las propiedades de orden y balanceo de forma probabilística.
