@@ -28,7 +28,7 @@ Si se insertan estos errores en orden de aparición, la solución con una lista 
 - Campo de formulario bloqueado – Severidad 1  
 
 Sin embargo, en un escenario real se descubren nuevos errores y pueden cambiar las prioridades (por ejemplo, la aparición de un error crítico como 
-"contraseña sin encriptar en la base de datos" con severidad 10), lo que exige una solución dinámica para mantener el orden de prioridades.
+"Contraseña sin encriptar en la base de datos" con severidad 10), lo que exige una solución dinámica para mantener el orden de prioridades.
 
 
 ##### *Soluciones para mantener el orden*  
