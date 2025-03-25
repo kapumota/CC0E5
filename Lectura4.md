@@ -57,14 +57,14 @@ Esta interfaz establece, por ejemplo, que:
 - **update(e, p)** actualiza la prioridad del elemento *e*.  
 - **size()** retorna el número de elementos almacenados.
 
-Se destaca que la cola de prioridad se considera una “caja negra”: el usuario interactúa únicamente a través de esta API sin necesidad de conocer los detalles internos de su implementación. Además, se hace la diferenciación entre la estructura de datos abstracta (la API y las invariantes que debe cumplir) y la implementación concreta (por ejemplo, mediante un heap basado en un arreglo).
+Se destaca que la cola de prioridad se considera una "caja negra": el usuario interactúa únicamente a través de esta API sin necesidad de conocer los detalles internos de su implementación. Además, se hace la diferenciación entre la estructura de datos abstracta (la API y las invariantes que debe cumplir) y la implementación concreta (por ejemplo, mediante un heap basado en un arreglo).
 
 ##### *Uso práctico de la cola de prioridad*  
-Imagina que se insertan los errores en la cola de prioridad. El sistema, a través de su API, permite conocer el número de elementos y obtener el elemento superior (de mayor prioridad) mediante la operación **top()**, la cual extrae dicho elemento. Por ejemplo, al llamar a **top()** se obtendría “La interfaz se rompe en el navegador X” (con severidad 9), y al llamarla nuevamente se obtendría “El estilo CSS causa desalineación” (con severidad 8). Así, el manejo de la prioridad se realiza sin necesidad de ordenar la lista completa en cada modificación.
+Imagina que se insertan los errores en la cola de prioridad. El sistema, a través de su API, permite conocer el número de elementos y obtener el elemento superior (de mayor prioridad) mediante la operación **top()**, la cual extrae dicho elemento. Por ejemplo, al llamar a **top()** se obtendría "La interfaz se rompe en el navegador X" (con severidad 9), y al llamarla nuevamente se obtendría "El estilo CSS causa desalineación" (con severidad 8). Así, el manejo de la prioridad se realiza sin necesidad de ordenar la lista completa en cada modificación.
 
 ##### *La prioridad como generalización de FIFO*  
 Aunque el orden natural de llegada (FIFO) puede ser considerado justo en algunos casos, existen situaciones donde ciertos elementos deben ser atendidos antes que otros, independientemente del orden de inserción.  
-Por ejemplo, en una sala de emergencias o al gestionar correos electrónicos, no se sigue estrictamente el orden de llegada, sino que se evalúa la importancia o urgencia de cada elemento. Esto ilustra cómo las colas de prioridad permiten implementar un mecanismo en el que la “prioridad” del elemento determina el orden de atención.
+Por ejemplo, en una sala de emergencias o al gestionar correos electrónicos, no se sigue estrictamente el orden de llegada, sino que se evalúa la importancia o urgencia de cada elemento. Esto ilustra cómo las colas de prioridad permiten implementar un mecanismo en el que la "prioridad" del elemento determina el orden de atención.
 
 ##### *Implementaciones concretas y comparación de rendimiento*  
 Se evalúan tres alternativas para implementar una cola de prioridad utilizando estructuras de datos básicas:
@@ -82,7 +82,7 @@ Se evalúan tres alternativas para implementar una cola de prioridad utilizando 
 
 La siguiente tabla resume el rendimiento de las operaciones:
 
-Tabla Rendimiento para las operaciones provistas por las colas de prioridad, desglosadas según la estructura de datos subyacente:
+Tabla: Rendimiento para las operaciones provistas por las colas de prioridad, desglosadas según la estructura de datos subyacente:
 
 Operación         | Arreglo no ordenado | Arreglo ordenado | Árbol balanceado  
 ------------------|---------------------|------------------|-------------------  
