@@ -1,0 +1,152 @@
+### Operaciones en heaps: PushDown, Insert, Top y Update
+
+El manejo eficiente de un heap requiere el uso de operaciones auxiliares que garanticen el mantenimiento de las propiedades estructurales y de prioridad definidas para la estructura. Entre estas operaciones se destacan dos métodos básicos: uno que mueve un elemento hacia arriba (bubbleUp, tratado en otra sección) y otro que lo desplaza hacia abajo (pushDown). Además, se cuenta con operaciones que permiten la inserción de nuevos elementos, la extracción del elemento superior y la actualización de la prioridad de un elemento existente. A continuación se presentan en detalle las operaciones pushDown, insert, top y update.
+
+#### Operación PushDown
+
+El método **pushDown** se utiliza cuando un elemento, al haber sufrido una modificación o tras la eliminación de la raíz, podría violar la invariante de prioridad en relación con sus hijos. Aunque el elemento modificado mantenga la propiedad respecto a su padre, es posible que, al compararlo con sus hijos, se encuentre que alguno de ellos posee una prioridad superior. Esto ocurre, por ejemplo, cuando se extrae la raíz del heap y se reemplaza con el último elemento del arreglo o cuando se disminuye la prioridad de un nodo. La función pushDown garantiza que, moviendo el elemento hacia abajo, se restablezca el orden del heap.
+
+**Pseudocódigo del método pushDown**
+
+```pseudo
+function pushDown(pairs, index=0)
+  currentIndex ← index
+  while currentIndex < firstLeafIndex(pairs) do
+    (child, childIndex) ← highestPriorityChild(currentIndex)
+    if child.priority > pairs[currentIndex].priority then
+      swap(pairs, currentIndex, childIndex)
+      currentIndex ← childIndex
+    else
+      break
+```
+
+**Explicación línea por línea**
+
+- Se inicia estableciendo el índice actual en el valor de entrada (por defecto 0, que corresponde a la raíz del heap).  
+- Se continúa iterando mientras el índice actual sea menor que el índice de la primera hoja, ya que las hojas no tienen hijos y no es necesario reubicarlas.  
+- En cada iteración se identifica cuál de los hijos del nodo actual tiene la mayor prioridad mediante la función `highestPriorityChild`.  
+- Si el hijo identificado tiene una prioridad mayor que el nodo actual, se procede a intercambiar ambos elementos y se actualiza el índice actual para continuar evaluando el nodo en su nueva posición.  
+- Si no se cumple la condición de intercambio, se termina el proceso, ya que el nodo se encuentra en la posición adecuada.
+
+**Versión optimizada de pushDown**
+
+Esta versión evita intercambios innecesarios. En lugar de realizar un intercambio en cada iteración, se guarda el elemento actual en una variable temporal y se “mueven” los hijos de mayor prioridad hacia arriba hasta encontrar el sitio correcto para insertar el elemento.
+
+```pseudo
+function pushDown(pairs, index=0)
+  current ← pairs[index]
+  while index < firstLeafIndex(pairs) do
+    (child, childIndex) ← highestPriorityChild(index)
+    if child.priority > current.priority then
+      pairs[index] ← pairs[childIndex]
+      index ← childIndex
+    else
+      break
+  pairs[index] ← current
+```
+
+En esta versión, se almacena en `current` el elemento a reubicar. Durante la iteración, si se detecta que un hijo tiene mayor prioridad que `current`, se mueve ese hijo hacia la posición actual y se actualiza el índice. Cuando ya no se cumple la condición, se coloca `current` en su posición definitiva, evitando múltiples intercambios y reduciendo el número de asignaciones.
+
+#### Operación de inserción (insertar)
+
+La operación de inserción permite agregar un nuevo elemento al heap, manteniendo las propiedades estructurales y de prioridad. Inicialmente, el nuevo elemento se añade al final del arreglo que representa el heap, lo que preserva la propiedad de completitud. No obstante, es posible que este nuevo elemento viole la invariante de prioridad (por ejemplo, en un max-heap, si tiene una prioridad mayor que la de su padre). Por ello, se utiliza la función **bubbleUp** para desplazar el elemento hacia arriba hasta su posición correcta.
+
+**Pseudocódigo para la inserción**
+
+```pseudo
+function insert(element, priority)
+  p ← Pair(element, priority)
+  pairs.append(p)
+  bubbleUp(pairs, |pairs| – 1)
+```
+
+**Explicación del proceso**
+
+- Se crea una estructura que asocia el elemento con su prioridad.  
+- Este par se añade al final del arreglo, manteniendo la propiedad de árbol completo.  
+- Finalmente, se invoca la función **bubbleUp** con el índice del nuevo elemento, para desplazarlo hacia arriba y restaurar la invariante de prioridad.
+
+La complejidad de esta operación depende de la altura del heap, siendo logarítmica en función del número de elementos.
+
+#### Operación top (extracción del elemento superior)
+
+El método **top** extrae el elemento superior del heap, es decir, el de mayor (o menor, en un min-heap) prioridad. Esta operación es fundamental para el uso de colas de prioridad, ya que permite obtener de forma eficiente el elemento “más importante”. Al extraer la raíz, se genera un “hueco” que debe ser rellenado para mantener la estructura y la invariante del heap.
+
+**Pseudocódigo del método top**
+
+```pseudo
+function top()
+  if pairs.isEmpty() then error()
+  p ← pairs.removeLast()
+  if pairs.isEmpty() then
+    return p.element
+  else  
+    (element, priority) ← pairs[0]
+    pairs[0] ← p
+    pushDown(pairs, 0)
+    return element
+```
+
+**Explicación detallada**
+
+- Se verifica que el heap no esté vacío; de lo contrario, se lanza un error.  
+- Se elimina el último elemento del arreglo y se almacena en una variable temporal.  
+- Si, tras esta eliminación, el arreglo queda vacío (lo que sucede cuando solo había un elemento), se retorna directamente ese elemento.  
+- Si aún quedan elementos, se almacena el contenido de la raíz y se reemplaza con el último elemento extraído.  
+- Se llama a **pushDown** para reubicar el nuevo elemento en la raíz, asegurando que se mantenga la invariante del heap.  
+- Finalmente, se retorna el elemento original de la raíz.
+
+Debido a que tanto la eliminación del último elemento como la operación pushDown son logarítmicas, la complejidad total de top() es ` O(\log_D(n)) ` en el peor de los casos.
+
+#### Operación update (actualización de prioridad)
+
+El método **update** permite modificar la prioridad de un elemento ya existente en el heap. Esta operación es especialmente útil en escenarios donde las prioridades pueden cambiar en función de eventos externos o del progreso de ciertos procesos. Al actualizar la prioridad, el elemento podría quedar desubicado, por lo que es necesario aplicar bubbleUp o pushDown según convenga.
+
+**Pseudocódigo del método update**
+
+```pseudo
+function update(oldValue, newPriority)
+  index ← pairs.find(oldValue)
+  if index ≥ 0 then
+    oldPriority ← pairs[index].priority
+    pairs[index] ← Pair(oldValue, newPriority)
+    if (newPriority < oldPriority) then
+      bubbleUp(pairs, index)
+    elsif (newPriority > oldPriority) then        
+      pushDown(pairs, index)
+```
+
+**Desglose del proceso**
+
+- Se localiza la posición del elemento a actualizar mediante la función `pairs.find(oldValue)`.  
+- Si el elemento se encuentra, se almacena su prioridad antigua y se actualiza el par con la nueva prioridad.  
+- Se compara la nueva prioridad con la antigua:  
+  - Si la nueva prioridad es menor (en un max-heap, esto indica que el elemento podría estar demasiado alto), se invoca **bubbleUp** para moverlo hacia arriba.  
+  - Si la nueva prioridad es mayor, se utiliza **pushDown** para desplazar el elemento hacia abajo y restaurar el orden correcto.
+  
+El rendimiento de esta operación depende, en primer lugar, de la eficiencia en la búsqueda del elemento a actualizar. En implementaciones simples esta búsqueda puede ser lineal; sin embargo, es común emplear estructuras auxiliares (como un mapa hash) para lograr búsquedas en tiempo amortizado O(1). Además, las funciones bubbleUp y pushDown, que se aplican después de la actualización, tienen una complejidad logarítmica.
+
+#### Integración de las operaciones en la API del Heap
+
+Con las funciones auxiliares bubbleUp y pushDown bien definidas, las operaciones principales del heap (insert, top y update) se simplifican considerablemente. Cada operación se apoya en estas funciones para garantizar que, tras cualquier modificación (ya sea la adición, extracción o actualización de un elemento), las propiedades del heap se mantengan sin violaciones:
+
+- **Inserción:** Se añade el nuevo elemento al final del arreglo y se llama a bubbleUp para posicionarlo correctamente.  
+- **Extracción (top):** Se elimina la raíz, se reemplaza por el último elemento y se ajusta su posición mediante pushDown.  
+- **Actualización:** Se modifica la prioridad de un elemento y, en función del cambio, se utiliza bubbleUp o pushDown para reubicarlo correctamente.
+
+El diseño modular de estas operaciones facilita la adaptación del heap a diferentes requerimientos. Por ejemplo, la distinción entre max-heap y min-heap puede lograrse variando las condiciones de comparación en bubbleUp y pushDown o ajustando la función de prioridad, sin modificar la estructura base del código.
+
+La implementación compacta del heap, basada en un arreglo, permite que la asignación de memoria sea contigua, favoreciendo la localidad de referencia y, en consecuencia, mejorando la eficiencia en el acceso a los elementos.
+
+#### Consideraciones adicionales sobre la manipulación del heap
+
+**Manejo del tamaño del arreglo**
+
+En la implementación práctica es fundamental el manejo del arreglo que almacena los pares (elemento, prioridad). Dependiendo del lenguaje y la estructura de datos utilizada, el arreglo puede ser estático o dinámico:
+- En un **arreglo estático** se define un tamaño máximo al crearlo, limitando el número de elementos pero garantizando que las operaciones se realicen en tiempo logarítmico.  
+- En un **arreglo dinámico** el tamaño se redimensiona automáticamente conforme se agregan elementos. Aunque la redimensión puede implicar un costo momentáneo, este se distribuye de forma amortizada, manteniendo la eficiencia global.
+
+**Impacto del factor de ramificación**
+
+La complejidad de las operaciones en un heap también depende del factor de ramificación `D`. En un heap binario (`D = 2`) se realizan menos comparaciones por nivel, mientras que en un heap d-ario (` D > 2 `) se evalúan más hijos en cada iteración, lo que puede aumentar el número de comparaciones en pushDown. Sin embargo, al aumentar ` D ` se reduce la altura del heap, lo que puede compensar el mayor número de comparaciones. La elección del factor de ramificación es, por tanto, un equilibrio entre el número de comparaciones por nodo y la profundidad del árbol.
+
