@@ -177,7 +177,7 @@ En esta tabla, cada secuencia de bits cumple la propiedad de código prefijo, lo
 
 #### 4. Implementación en Python
 
-Para ilustrar la transición del pseudocódigo a una implementación real, se presenta a continuación un ejemplo simplificado en Python que muestra cómo se podrían implementar algunas de las funciones clave, en particular las operaciones utilizadas en el algoritmo de Huffman y en la selección de los k elementos más grandes.
+Para ilustrar la transición del pseudocódigo a una implementación real, se presenta a continuación un ejemplo simplificado en Python que muestra cómo se podrían implementar algunas de las funciones clave, en particular las operaciones utilizadas en el algoritmo de Huffman y en la selección de los `k` elementos más grandes.
 
 ##### 4.1 Ejemplo de código para el algoritmo de Huffman
 
@@ -297,7 +297,8 @@ Como se ha descrito anteriormente, la construcción de códigos de Huffman es ot
 
 ##### 5.3 Procesamiento en flujos de datos
 
-En situaciones donde los datos se reciben de forma continua (por ejemplo, flujos de datos en tiempo real), el uso de un min-heap limitado a `k` elementos permite mantener siempre los k elementos más grandes vistos hasta el momento sin necesidad de almacenar todo el conjunto de datos. Esta característica resulta especialmente útil en aplicaciones de monitoreo y análisis en tiempo real, donde el volumen total de datos puede ser muy elevado, pero solo es necesario conservar un subconjunto representativo.
+En situaciones donde los datos se reciben de forma continua (por ejemplo, flujos de datos en tiempo real), el uso de un min-heap limitado a 
+`k` elementos permite mantener siempre los `k` elementos más grandes vistos hasta el momento sin necesidad de almacenar todo el conjunto de datos. Esta característica resulta especialmente útil en aplicaciones de monitoreo y análisis en tiempo real, donde el volumen total de datos puede ser muy elevado, pero solo es necesario conservar un subconjunto representativo.
 
 #### 6. Aspectos generales en la aplicación de heaps
 
