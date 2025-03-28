@@ -14,7 +14,7 @@ Aunque el heap se representa conceptualmente como un árbol, las propiedades est
 
 ####  Representación en arreglo
 
-La idea central de la representación en arreglo es que, para almacenar N elementos, el árbol se mapea directamente en un arreglo de N posiciones. Al asumir que el índice de inicio es 0, la relación entre padres e hijos es la siguiente:
+La idea central de la representación en arreglo es que, para almacenar N elementos, el árbol se mapea directamente en un arreglo de `N` posiciones. Al asumir que el índice de inicio es 0, la relación entre padres e hijos es la siguiente:
 
 - Para el nodo en la posición **i**:
   - El hijo izquierdo se encuentra en la posición **(2 * i) + 1**.
@@ -66,9 +66,9 @@ El contrato con el usuario es que el elemento que se devuelva siempre tendrá la
 
 La noción de prioridad en un heap es relativa y depende de cómo se interprete el valor numérico asociado a cada elemento. Existen dos variantes principales:
 
-- **Max-Heap**: Se define que un número mayor representa una mayor prioridad. Así, si se tiene dos prioridades p1 y p2, la condición p1 > p2 indica que p1 es de mayor prioridad. En un max-heap, el elemento con el valor numérico más alto se encuentra en la cima de la estructura.
+- **Max-Heap**: Se define que un número mayor representa una mayor prioridad. Así, si se tiene dos prioridades `p1` y `p2`, la condición `p1 > p2` indica que `p1` es de mayor prioridad. En un max-heap, el elemento con el valor numérico más alto se encuentra en la cima de la estructura.
   
-- **Min-Heap**: Aquí se asume que los números más pequeños tienen mayor prioridad. Esto implica que, para dos prioridades, si p1 > p2, se considera que p2 es la de mayor prioridad. En esta variante, el elemento con el menor valor numérico estará en la cima.
+- **Min-Heap**: Aquí se asume que los números más pequeños tienen mayor prioridad. Esto implica que, para dos prioridades, si `p1 > p2`, se considera que `p2` es la de mayor prioridad. En esta variante, el elemento con el menor valor numérico estará en la cima.
 
 En implementaciones prácticas, es común parametrizar la función de prioridad para generalizar el comportamiento del heap. Sin embargo, en aplicaciones específicas (por ejemplo, en la gestión de tareas) es posible aprovechar el orden natural de ciertas tuplas. Por ejemplo, si se almacenan tareas como pares (edad, tarea) en un min-heap, se extraerá primero la tarea con la edad menor. Si se requiere que la tarea más antigua (con mayor edad) sea la que se extraiga primero, se puede lograr utilizando la transformación de la prioridad, es decir, almacenando las tuplas como (-edad, tarea). 
 
@@ -97,7 +97,7 @@ Un dato curioso es que, si se toma `D = 1`, el heap se convierte en un arreglo o
 
 Con la base teórica asentada, se aborda ahora la implementación práctica de un heap, enfocándose en los métodos que permiten mantener la propiedad de prioridad tras cada modificación. Las operaciones que pueden alterar la estructura del heap son:
 
-- **Inserción de un nuevo elemento**: Al agregar un nuevo ítem, se coloca inicialmente al final del arreglo y, posteriormente, es necesario “restablecer” el orden del heap.
+- **Inserción de un nuevo elemento**: Al agregar un nuevo ítem, se coloca inicialmente al final del arreglo y, posteriormente, es necesario "restablecer" el orden del heap.
 - **Eliminación del elemento superior**: Al eliminar el elemento en la cima del heap, se debe reestructurar la jerarquía para que el nuevo elemento superior cumpla con la propiedad de prioridad.
 - **Actualización de la prioridad de un elemento**: Modificar la prioridad de un ítem puede causar que su posición actual no sea la correcta, por lo que se debe reacomodar el elemento.
 
@@ -108,7 +108,7 @@ Para resolver estos problemas, se definen dos funciones auxiliares que ayudan a 
 El método **bubbleUp** se invoca cuando un elemento tiene una prioridad mayor que la de su padre. Este método tiene la finalidad de mover el elemento "hacia arriba" en el heap 
 hasta que se encuentre en la posición correcta, es decir, hasta que su prioridad sea menor o igual a la de su nuevo padre o hasta que alcance la raíz.
 
-#####  Pseudocódigo inicial del BubbleUp
+#####  Pseudocódigo inicial del bubbleUp
 
 El siguiente pseudocódigo describe una implementación básica del método **bubbleUp**:
 
@@ -166,6 +166,5 @@ function bubbleUp(pairs, index=|pairs|-1)
 - **Comparación sin intercambio inmediato**: Se verifica si la prioridad del elemento en el padre es menor que la de `current`. Si es así, se copia el elemento del padre a la posición actual (línea 5) y se actualiza el índice a la posición del padre (línea 6). Este movimiento "baja" el elemento del padre en la jerarquía.
 - **Inserción final**: Una vez se encuentra el lugar correcto (cuando la condición deja de cumplirse o se alcanza la raíz), se copia el elemento almacenado en `current` a la posición determinada (línea 8).
 
-Con esta optimización se evitan múltiples asignaciones redundantes, ya que el elemento "asciende" de forma acumulativa sin realizar intercambios completos en cada iteración. En el peor de los casos, para un camino de altura H se realizan H+1 asignaciones, lo que representa una mejora significativa (ahorrando aproximadamente un 66 % en el número de asignaciones) 
-respecto a la versión ingenua.
+Con esta optimización se evitan múltiples asignaciones redundantes, ya que el elemento "asciende" de forma acumulativa sin realizar intercambios completos en cada iteración. En el peor de los casos, para un camino de altura `H` se realizan `H+1` asignaciones, lo que representa una mejora significativa (ahorrando aproximadamente un 66 % en el número de asignaciones)  respecto a la versión ingenua.
 
