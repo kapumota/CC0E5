@@ -1,10 +1,14 @@
 ### Operaciones en heaps: PushDown, Insert, Top y Update
 
-El manejo eficiente de un heap requiere el uso de operaciones auxiliares que garanticen el mantenimiento de las propiedades estructurales y de prioridad definidas para la estructura. Entre estas operaciones se destacan dos métodos básicos: uno que mueve un elemento hacia arriba (bubbleUp, tratado en otra sección) y otro que lo desplaza hacia abajo (pushDown). Además, se cuenta con operaciones que permiten la inserción de nuevos elementos, la extracción del elemento superior y la actualización de la prioridad de un elemento existente. A continuación se presentan en detalle las operaciones pushDown, insert, top y update.
+El manejo eficiente de un heap requiere el uso de operaciones auxiliares que garanticen el mantenimiento de las propiedades estructurales y de prioridad definidas para la estructura. Entre estas operaciones se destacan dos métodos básicos: uno que mueve un elemento hacia arriba (bubbleUp, tratado en otra sección) y otro que lo desplaza hacia abajo (pushDown). 
+
+Además, se cuenta con operaciones que permiten la inserción de nuevos elementos, la extracción del elemento superior y la actualización de la prioridad de un elemento existente. A continuación se presentan en detalle las operaciones pushDown, insert, top y update.
 
 #### Operación PushDown
 
-El método **pushDown** se utiliza cuando un elemento, al haber sufrido una modificación o tras la eliminación de la raíz, podría violar la invariante de prioridad en relación con sus hijos. Aunque el elemento modificado mantenga la propiedad respecto a su padre, es posible que, al compararlo con sus hijos, se encuentre que alguno de ellos posee una prioridad superior. Esto ocurre, por ejemplo, cuando se extrae la raíz del heap y se reemplaza con el último elemento del arreglo o cuando se disminuye la prioridad de un nodo. La función pushDown garantiza que, moviendo el elemento hacia abajo, se restablezca el orden del heap.
+El método **pushDown** se utiliza cuando un elemento, al haber sufrido una modificación o tras la eliminación de la raíz, podría violar la invariante de prioridad en relación con sus hijos. Aunque el elemento modificado mantenga la propiedad respecto a su padre, es posible que, al compararlo con sus hijos, se encuentre que alguno de ellos posee una prioridad superior. 
+
+Esto ocurre, por ejemplo, cuando se extrae la raíz del heap y se reemplaza con el último elemento del arreglo o cuando se disminuye la prioridad de un nodo. La función pushDown garantiza que, moviendo el elemento hacia abajo, se restablezca el orden del heap.
 
 **Pseudocódigo del método pushDown**
 
@@ -30,7 +34,7 @@ function pushDown(pairs, index=0)
 
 **Versión optimizada de pushDown**
 
-Esta versión evita intercambios innecesarios. En lugar de realizar un intercambio en cada iteración, se guarda el elemento actual en una variable temporal y se “mueven” los hijos de mayor prioridad hacia arriba hasta encontrar el sitio correcto para insertar el elemento.
+Esta versión evita intercambios innecesarios. En lugar de realizar un intercambio en cada iteración, se guarda el elemento actual en una variable temporal y se "mueven" los hijos de mayor prioridad hacia arriba hasta encontrar el sitio correcto para insertar el elemento.
 
 ```pseudo
 function pushDown(pairs, index=0)
@@ -70,7 +74,7 @@ La complejidad de esta operación depende de la altura del heap, siendo logarít
 
 #### Operación top (extracción del elemento superior)
 
-El método **top** extrae el elemento superior del heap, es decir, el de mayor (o menor, en un min-heap) prioridad. Esta operación es fundamental para el uso de colas de prioridad, ya que permite obtener de forma eficiente el elemento “más importante”. Al extraer la raíz, se genera un “hueco” que debe ser rellenado para mantener la estructura y la invariante del heap.
+El método **top** extrae el elemento superior del heap, es decir, el de mayor (o menor, en un min-heap) prioridad. Esta operación es fundamental para el uso de colas de prioridad, ya que permite obtener de forma eficiente el elemento "más importante". Al extraer la raíz, se genera un "hueco" que debe ser rellenado para mantener la estructura y la invariante del heap.
 
 **Pseudocódigo del método top**
 
