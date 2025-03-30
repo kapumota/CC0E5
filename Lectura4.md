@@ -1,4 +1,5 @@
-### **Mejorando las colas de prioridad: heaps d-arios**
+### Optimización de tareas con colas de prioridad
+
 #### El problema: Manejar la prioridad
 
 El primer problema que vamos a abordar es el manejo de tareas basadas en la prioridad. Esto es algo con lo que todos estamos familiarizados de alguna manera. El problema puede describirse en estos términos: dada una colección de tareas con diferentes prioridades, determinar qué tarea debe ejecutarse a continuación.
@@ -16,7 +17,7 @@ Para simplificar nuestro ejemplo, limitemos el caso a una herramienta de seguimi
 
 Cada error se verá como una tupla: `<descripción de la tarea, importancia de no cumplir con el plazo>`. Así, por ejemplo, podríamos tener lo siguiente:
 
-##### Ejemplo 1
+##### Versión 1
 
 | Descripción de la tarea                                                        | Severidad (1-10) |
 | ------------------------------------------------------------------------------ | ---------------- |
@@ -30,7 +31,7 @@ Siempre que los recursos (por ejemplo, desarrolladores) sean limitados, surge la
 
 Ahora, supongamos que una desarrolladora de nuestro equipo termina su tarea actual. Ella le pide a nuestro sistema que le indique el siguiente error que necesita ser solucionado. Si esta lista fuera estática, el software de nuestro sistema podría simplemente ordenar los errores una vez y devolverlos en ese orden.
 
-##### Ejemplo 2
+##### Versión 2
 
 | Descripción de la tarea                                                        | Severidad (1-10) |
 | ------------------------------------------------------------------------------ | ---------------- |
@@ -42,7 +43,7 @@ Ahora, supongamos que una desarrolladora de nuestro equipo termina su tarea actu
 
 Como puedes imaginar, sin embargo, ese no es el caso. Primero, se descubren nuevos errores todo el tiempo, por lo que se añadirán nuevos elementos a la lista. Supón que se descubre un desagradable error de encriptación. Además, la prioridad de los errores puede cambiar con el tiempo. Por ejemplo, tu CEO podría decidir que debes enfocarte en la cuota de mercado que usa mayoritariamente el navegador X, y tienes un gran lanzamiento de funcionalidad el próximo viernes 13, por lo que realmente necesitas solucionar ese error, el que estaba al final, en un par de días.
 
-##### Ejemplo 3
+##### Versión 3
 
 | Descripción de la tarea                                                        | Severidad (1-10) |
 | ------------------------------------------------------------------------------ | ---------------- |
@@ -116,7 +117,7 @@ No necesitas conocer los detalles internos de la biblioteca en este punto; solo 
 
 Por ejemplo, supongamos que añadimos nuestros errores a nuestra PQ en el mismo orden que vimos anteriormente:
 
-##### Ejemplo 4
+##### Versión 4
 
 | Descripción de la tarea                                                        | Severidad (1-10) |
 | ------------------------------------------------------------------------------ | ---------------- |
@@ -130,7 +131,7 @@ Si devolviéramos las tareas en el mismo orden en que se insertaron, simplemente
 
 En cambio, supongamos que ahora tenemos nuestra cola de prioridad conteniendo esos cinco elementos; aún no conocemos los detalles internos de la PQ, pero podemos consultarla a través de su API. Por ejemplo, podemos comprobar cuántos elementos contiene e incluso echar un vistazo al que está en la parte superior. O podemos pedirle directamente que nos devuelva el elemento superior (el de mayor prioridad) y lo elimine de la cola.
 
-##### Ejemplo 5
+##### Versión 5
 
 | Descripción de la tarea                                                        | Severidad (1-10) |
 | ------------------------------------------------------------------------------ | ---------------- |
