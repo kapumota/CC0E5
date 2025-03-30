@@ -1,106 +1,184 @@
-### **Introducción y contexto general**
+### **Mejorando las colas de prioridad: heaps d-arios**
+#### El problema: Manejar la prioridad
 
-Establecemos las bases para construir estructuras de datos cada vez más avanzadas. Se exploran mejoras sobre estructuras básicas (como heaps binarios y árboles no balanceados) y 
-se muestran ejemplos que evidencian que la solución óptima depende siempre del contexto y de los requisitos del problema.  
+El primer problema que vamos a abordar es el manejo de tareas basadas en la prioridad. Esto es algo con lo que todos estamos familiarizados de alguna manera. El problema puede describirse en estos términos: dada una colección de tareas con diferentes prioridades, determinar qué tarea debe ejecutarse a continuación.
 
-#### **Mejorando las colas de prioridad: heaps d-arios**
+Podemos encontrar muchos ejemplos en el mundo real donde aplicamos, consciente o inconscientemente, técnicas que nos ayudan a decidir qué hacer a continuación. Nuestras vidas diarias están llenas de tareas; generalmente, el orden en el que las realizamos es resultado de las limitaciones de tiempo y de la importancia que les asignamos.
 
-##### *Descripción del problema: manejar la prioridad*  
-El primer problema que se aborda es el manejo de tareas basadas en prioridad. Se trata de determinar, dada una colección de tareas con diferentes niveles de urgencia, cuál debe ejecutarse a continuación.  
-Ejemplos comunes de este problema son el funcionamiento de salas de emergencias, planificadores de sistemas operativos o aplicaciones móviles para gestionar listas de tareas.
-
-##### *Ejemplo práctico: seguimiento de errores*  
-Para ilustrar el problema se propone el caso de un sistema de seguimiento de errores en el que cada error está asociado a una prioridad (por ejemplo, la cantidad de días en que debe ser solucionado, siendo los números menores los de mayor urgencia).  
-Se presenta una lista inicial de errores, cada uno con su descripción y severidad (en una escala del 1 al 10). Por ejemplo:  
-
-- Las cargas de la página tardan más de 2 segundos – Severidad 7  
-- La interfaz se rompe en el navegador X – Severidad 9  
-- Campo de formulario bloqueado en el navegador X el viernes 13 – Severidad 1  
-- El estilo CSS causa desalineación – Severidad 8  
-- El estilo CSS causa una desalineación de 1px en el navegador X – Severidad 5  
-
-Si se insertan estos errores en orden de aparición, la solución con una lista ordenada produciría un reordenamiento de la siguiente manera:  
-
-- La interfaz se rompe en el navegador X – Severidad 9  
-- El estilo CSS causa desalineación – Severidad 8  
-- Las cargas de la página tardan más de 2 segundos – Severidad 7  
-- El estilo CSS causa una desalineación de 1px – Severidad 5  
-- Campo de formulario bloqueado – Severidad 1  
-
-Sin embargo, en un escenario real se descubren nuevos errores y pueden cambiar las prioridades (por ejemplo, la aparición de un error crítico como 
-"Contraseña sin encriptar en la base de datos" con severidad 10), lo que exige una solución dinámica para mantener el orden de prioridades.
+Un ejemplo común de un entorno en el que las tareas se ejecutan por prioridad es una sala de emergencias, donde los pacientes son atendidos, no según el orden en que llegaron, sino en función de la urgencia de sus condiciones. Si nos acercamos a nuestro dominio de IT, existen muchas herramientas y sistemas que tienen el mismo comportamiento. Piensa, por ejemplo, en el planificador de tu sistema operativo o en una aplicación móvil para gestionar una lista de tareas.
 
 
-##### *Soluciones para mantener el orden*  
-Una opción es actualizar una lista ordenada cada vez que se inserta, elimina o modifica un elemento. Esto puede funcionar en escenarios con pocos elementos, pero si la lista contiene millones de elementos, el costo de reordenar la lista (con operaciones lineales) se vuelve prohibitivo.  
-La solución óptima es utilizar una **cola de prioridad**, que permite mantener un ordenamiento parcial con la garantía de que el siguiente elemento a procesar es siempre el de mayor prioridad. Al renunciar a un ordenamiento total se gana eficiencia: cada operación en la cola puede realizarse en tiempo logarítmico.
+#### Prioridad en la práctica: Seguimiento de errores
 
-##### *Estructura y API de la cola de prioridad*  
-Se define la API (el contrato) de la cola de prioridad de la siguiente manera:
+El ejemplo que me gustaría utilizar, sin embargo, es un sistema de seguimiento de errores. Probablemente ya estés familiarizado con una herramienta de este tipo. Cuando trabajas en equipo, necesitas una forma de rastrear errores y tareas para que no dos personas trabajen en el mismo problema y se duplique el esfuerzo, asegurándote a la vez de que los problemas se aborden en el orden correcto (según el modelo de negocio).
 
-```
-class PriorityQueue { 
-    top() → elemento  
-    peek() → elemento  
-    insert(elemento, prioridad)  
-    remove(elemento)  
-    update(elemento, nuevaPrioridad)  
+Para simplificar nuestro ejemplo, limitemos el caso a una herramienta de seguimiento de errores donde cada error está asociado con una prioridad, expresada como el número de días dentro de los cuales necesita ser solucionado (números menores indican mayor prioridad). Además, supongamos que los errores son independientes, por lo que ningún error requiere solucionar otro error como requisito previo. Para nuestro ejemplo, consideremos la siguiente lista de errores (en orden disperso) para una aplicación web de una sola página.
+
+Cada error se verá como una tupla: `<descripción de la tarea, importancia de no cumplir con el plazo>`. Así, por ejemplo, podríamos tener lo siguiente:
+
+##### Ejemplo 1
+
+| Descripción de la tarea                                                        | Severidad (1-10) |
+| ------------------------------------------------------------------------------ | ---------------- |
+| Las cargas de la página tardan más de 2 segundos                                 | 7                |
+| La interfaz se rompe en el navegador X                                         | 9                |
+| Campo de formulario opcional bloqueado al usar el navegador X el viernes 13      | 1                |
+| El estilo CSS causa desalineación                                              | 8                |
+| El estilo CSS causa una desalineación de 1px en el navegador X                   | 5                |
+
+Siempre que los recursos (por ejemplo, desarrolladores) sean limitados, surge la necesidad de priorizar los errores. Por lo tanto, algunos errores son más urgentes que otros, y por ello se les asocia una prioridad.
+
+Ahora, supongamos que una desarrolladora de nuestro equipo termina su tarea actual. Ella le pide a nuestro sistema que le indique el siguiente error que necesita ser solucionado. Si esta lista fuera estática, el software de nuestro sistema podría simplemente ordenar los errores una vez y devolverlos en ese orden.
+
+##### Ejemplo 2
+
+| Descripción de la tarea                                                        | Severidad (1-10) |
+| ------------------------------------------------------------------------------ | ---------------- |
+| La interfaz se rompe en el navegador X                                         | 9                |
+| El estilo CSS causa desalineación                                              | 8                |
+| Las cargas de la página tardan más de 2 segundos                                 | 7                |
+| El estilo CSS causa una desalineación de 1px en el navegador X                   | 5                |
+| Campo de formulario opcional bloqueado al usar el navegador X el viernes 13      | 1                |
+
+Como puedes imaginar, sin embargo, ese no es el caso. Primero, se descubren nuevos errores todo el tiempo, por lo que se añadirán nuevos elementos a la lista. Supón que se descubre un desagradable error de encriptación. Además, la prioridad de los errores puede cambiar con el tiempo. Por ejemplo, tu CEO podría decidir que debes enfocarte en la cuota de mercado que usa mayoritariamente el navegador X, y tienes un gran lanzamiento de funcionalidad el próximo viernes 13, por lo que realmente necesitas solucionar ese error, el que estaba al final, en un par de días.
+
+##### Ejemplo 3
+
+| Descripción de la tarea                                                        | Severidad (1-10) |
+| ------------------------------------------------------------------------------ | ---------------- |
+| Contraseña sin encriptar en la base de datos                                   | 10               |
+| La interfaz se rompe en el navegador X                                         | 9                |
+| Campo de formulario opcional bloqueado al usar el navegador X el viernes 13      | 8                |
+| El estilo CSS causa desalineación                                              | 8                |
+| Las cargas de la página tardan más de 2 segundos                                 | 7                |
+| El estilo CSS causa una desalineación de 1px en el navegador X                   | 5                |
+
+
+#### Soluciones a la mano: Mantener una lista ordenada
+
+Obviamente, podríamos actualizar nuestra lista ordenada cada vez que se inserta, elimina o modifica un elemento. Esto puede funcionar bien si estas operaciones son poco frecuentes y el tamaño de nuestra lista es pequeño.
+
+Cualquiera de estas operaciones, de hecho, requeriría que un número lineal de elementos cambie de posición, tanto en el peor caso como en el caso promedio. Para este caso de uso, probablemente funcionaría. Pero si nuestra lista tuviera millones o miles de millones de elementos, lo más probable es que tendríamos problemas.
+
+#### De listas ordenadas a colas de prioridad
+
+Afortunadamente para nosotros, hay una solución mejor. Este es el caso de uso perfecto para una de las estructuras de datos fundamentales. Una **cola de prioridad** mantendrá un ordenamiento parcial de los elementos, con la garantía de que el siguiente elemento devuelto de la cola tendrá la mayor prioridad.
+
+Al renunciar al requisito de un ordenamiento total (que no necesitaríamos en este caso, porque solo consumimos tareas una por una), ganamos en rendimiento: cada una de las operaciones en la cola ahora puede requerir solo tiempo logarítmico.
+
+Como nota adicional, esto nos recuerda lo importante que es definir correctamente nuestros requisitos antes de implementar cualquier solución. Necesitamos asegurarnos de no sobrecomplicar nuestro trabajo y requisitos: por ejemplo, mantener una lista de elementos ordenada cuando lo único que necesitamos es un ordenamiento parcial desperdicia recursos y complica nuestro código, haciéndolo más difícil de mantener y escalar.
+
+#### Describiendo la API de la estructura de datos: Colas de prioridad
+
+Cada estructura de datos se puede descomponer en algunos componentes de nivel inferior:
+
+- **API** — La API es el contrato que una estructura de datos (ED) establece con los clientes externos. Incluye definiciones de métodos, así como algunas garantías sobre el comportamiento de los métodos que se proporcionan en la especificación de la ED. Por ejemplo, una cola de prioridad (PQ) proporciona estos métodos y garantías:
+  - `top()` — Devuelve y extrae el elemento con la mayor prioridad.
+  - `peek()` — Al igual que `top()`, devuelve el elemento con la mayor prioridad, pero sin extraerlo de la cola.
+  - `insert(e, p)` — Agrega un nuevo elemento `e` con prioridad `p` a la PQ.
+  - `remove(e)` — Elimina el elemento `e` de la cola.
+  - `update(e, p)` — Cambia la prioridad del elemento `e` y la establece en `p`.
+
+- **Invariantes** — (Opcional) Propiedades internas que se mantienen verdaderas a lo largo de la vida de la estructura de datos. Por ejemplo, una lista ordenada tendría la invariante de que cada elemento no es mayor que su sucesor. El propósito de las invariantes es asegurarse de que se cumplan siempre las condiciones necesarias para respetar el contrato con los clientes externos. Son las contrapartes internas de las garantías en la API.
+
+- **Modelo de datos** — Donde se alojan los datos. Esto puede ser un bloque de memoria sin procesar, una lista, un árbol, etc.
+
+- **Algoritmos** — La lógica interna que se utiliza para actualizar la estructura de datos asegurándose de que no se violen las invariantes.
+
+##### API y contrato para la cola de prioridad
+
+**Estructura de datos abstracta:** Cola de prioridad
+
+```java
+class PriorityQueue {
+    top() → elemento
+    peek() → elemento
+    insert(elemento, prioridad)
+    remove(elemento)
+    update(elemento, nuevaPrioridad)
     size() → int
 }
 ```
 
-Esta interfaz establece, por ejemplo, que:
-- **top()** devuelve y extrae el elemento con la mayor prioridad.  
-- **peek()** devuelve el elemento de mayor prioridad sin extraerlo.  
-- **insert(e, p)** añade un nuevo elemento *e* con prioridad *p*.  
-- **remove(e)** elimina el elemento *e*.  
-- **update(e, p)** actualiza la prioridad del elemento *e*.  
-- **size()** retorna el número de elementos almacenados.
+>**Contrato con el cliente:**  
+>El elemento superior devuelto por la cola es siempre el elemento con la mayor prioridad actualmente almacenado en la cola.
 
-Se destaca que la cola de prioridad se considera una "caja negra": el usuario interactúa únicamente a través de esta API sin necesidad de conocer los detalles internos de su implementación. Además, se hace la diferenciación entre la estructura de datos abstracta (la API y las invariantes que debe cumplir) y la implementación concreta (por ejemplo, mediante un heap basado en un arreglo).
+Existe una diferencia entre una estructura de datos abstracta y las estructuras de datos concretas. La primera incluye la API e invariantes, describiendo a un alto nivel cómo interactuarán los clientes con ella y los resultados y el rendimiento de las operaciones. La segunda se basa en los principios y la API expresados por la descripción abstracta, añadiendo una implementación concreta para su estructura y algoritmos (modelo de datos y algoritmos).
 
-##### *Uso práctico de la cola de prioridad*  
-Imagina que se insertan los errores en la cola de prioridad. El sistema, a través de su API, permite conocer el número de elementos y obtener el elemento superior (de mayor prioridad) mediante la operación **top()**, la cual extrae dicho elemento. Por ejemplo, al llamar a **top()** se obtendría "La interfaz se rompe en el navegador X" (con severidad 9), y al llamarla nuevamente se obtendría "El estilo CSS causa desalineación" (con severidad 8). Así, el manejo de la prioridad se realiza sin necesidad de ordenar la lista completa en cada modificación.
+Esta es exactamente la relación entre las colas de prioridad y los *heaps*. Una cola de prioridad es una estructura de datos abstracta que se puede implementar de muchas formas (incluida como una lista ordenada). Un *heap* es una implementación concreta de la cola de prioridad que utiliza un arreglo para contener los elementos y algoritmos específicos para hacer cumplir las invariantes.
 
-##### *La prioridad como generalización de FIFO*  
-Aunque el orden natural de llegada (FIFO) puede ser considerado justo en algunos casos, existen situaciones donde ciertos elementos deben ser atendidos antes que otros, independientemente del orden de inserción.  
-Por ejemplo, en una sala de emergencias o al gestionar correos electrónicos, no se sigue estrictamente el orden de llegada, sino que se evalúa la importancia o urgencia de cada elemento. Esto ilustra cómo las colas de prioridad permiten implementar un mecanismo en el que la "prioridad" del elemento determina el orden de atención.
 
-##### *Implementaciones concretas y comparación de rendimiento*  
-Se evalúan tres alternativas para implementar una cola de prioridad utilizando estructuras de datos básicas:
-  
-- **Arreglo no ordenado:**  
-  - Inserción en O(1).  
-  - Búsqueda del mínimo en O(1) (si se guarda el valor extra del mínimo), pero eliminación en O(n) (o viceversa, según el método).
+#### Cola de prioridad en acción
 
-- **Arreglo ordenado:**  
-  - Inserción en O(n).  
-  - Eliminación del mínimo en O(1).
+Imagina que se te proporciona una cola de prioridad. Esta puede provenir de una biblioteca de terceros o de una biblioteca estándar (muchos lenguajes, como C++ o Scala, ofrecen una implementación de colas de prioridad en su librería de contenedores estándar).
 
-- **Árbol balanceado (heap):**  
-  - Ambas operaciones (inserción y eliminación del mínimo) en O(log n).
+No necesitas conocer los detalles internos de la biblioteca en este punto; solo necesitas seguir su API pública y usarla, confiado en que está implementada correctamente. Este es el enfoque de "caja negra".
 
-La siguiente tabla resume el rendimiento de las operaciones:
+Por ejemplo, supongamos que añadimos nuestros errores a nuestra PQ en el mismo orden que vimos anteriormente:
 
-Tabla: Rendimiento para las operaciones provistas por las colas de prioridad, desglosadas según la estructura de datos subyacente:
+##### Ejemplo 4
 
-Operación         | Arreglo no ordenado | Arreglo ordenado | Árbol balanceado  
-------------------|---------------------|------------------|-------------------  
-Insertar          | O(1)                | O(n)             | O(log n)  
-Encontrar mínimo  | O(1) a              | O(1)             | O(1) a  
-Eliminar mínimo   | O(n) b              | O(1) c           | O(log n)  
+| Descripción de la tarea                                                        | Severidad (1-10) |
+| ------------------------------------------------------------------------------ | ---------------- |
+| Las cargas de la página tardan más de 2 segundos                                 | 7                |
+| La interfaz se rompe en el navegador X                                         | 9                |
+| Campo de formulario opcional bloqueado al usar el navegador X el viernes 13      | 1                |
+| El estilo CSS causa desalineación                                              | 8                |
+| El estilo CSS causa una desalineación de 1px en el navegador X                   | 5                |
 
-a) Se asume el costo de mantener un valor extra para el mínimo al insertar y eliminar.  
-b) Si se usa un búfer para acelerar la búsqueda del mínimo, al eliminar se debe buscar el siguiente mínimo.  
-c) Al almacenar el arreglo en orden inverso, eliminar el último elemento puede implicar simplemente reducir el tamaño del arreglo.
+Si devolviéramos las tareas en el mismo orden en que se insertaron, simplemente estaríamos implementando una cola sencilla.
 
-Esta comparación enfatiza la importancia de elegir una estructura de datos adecuada según el tamaño del conjunto y la frecuencia de operaciones, ya que la diferencia entre un comportamiento lineal y uno logarítmico puede ser determinante en aplicaciones a gran escala.
+En cambio, supongamos que ahora tenemos nuestra cola de prioridad conteniendo esos cinco elementos; aún no conocemos los detalles internos de la PQ, pero podemos consultarla a través de su API. Por ejemplo, podemos comprobar cuántos elementos contiene e incluso echar un vistazo al que está en la parte superior. O podemos pedirle directamente que nos devuelva el elemento superior (el de mayor prioridad) y lo elimine de la cola.
 
-##### *Relación entre estructuras abstractas y concretas*
+##### Ejemplo 5
 
-Toda estructura de datos abstracta (como la cola de prioridad) se implementa mediante una estructura de datos concreta (como un heap).  
-- La **estructura abstracta** define la API, las invariantes y el comportamiento esperado.  
-- La **implementación concreta** se encarga de la representación interna (por ejemplo, mediante un arreglo) y de los algoritmos específicos que garantizan el cumplimiento de las invariantes.
+| Descripción de la tarea                                                        | Severidad (1-10) |
+| ------------------------------------------------------------------------------ | ---------------- |
+| La interfaz se rompe en el navegador X                                         | 9                |
+| El estilo CSS causa desalineación                                              | 8                |
+| Las cargas de la página tardan más de 2 segundos                                 | 7                |
+| El estilo CSS causa una desalineación de 1px en el navegador X                   | 5                |
+| Campo de formulario opcional bloqueado al usar el navegador X el viernes 13      | 1                |
 
-Esta diferenciación es fundamental para poder utilizar y optimizar la estructura en componentes críticos de sistemas y algoritmos complejos, donde cada operación puede tener un impacto significativo en el rendimiento global.
+Si en la siguiente llamada a `top()` el elemento devuelto es **"La interfaz se rompe en el navegador X"**, el tamaño de la cola se convertirá en 4. Si llamamos a `top()` nuevamente, el siguiente elemento será **"El estilo CSS causa desalineación"** y el tamaño se convertirá en 3.
 
+Mientras la cola de prioridad esté implementada correctamente y dadas las prioridades en nuestros ejemplos, podemos estar seguros de que esos dos elementos serán los devueltos primero, independientemente del orden en el que se hayan insertado.
+
+
+#### La prioridad importa: Generalizar FIFO
+
+Ahora, la pregunta es cómo elegimos la prioridad de un elemento. A menudo, el orden natural dado por el tiempo que un elemento espera en una fila puede considerarse el más justo. Sin embargo, a veces hay algo especial en algunos elementos que podría sugerir que deberían ser atendidos antes que otros que han esperado más tiempo. Por ejemplo, no siempre lees tus correos electrónicos en el orden en que los recibiste, sino que a menudo te saltas boletines o chistes "divertidos" de amigos para leer primero los mensajes relacionados con el trabajo. Del mismo modo, en una sala de emergencias, el siguiente caso atendido no será necesariamente el que ha estado esperando más tiempo.
+
+Más bien, cada caso se evalúa a la llegada y se le asigna una prioridad, y se llamará al de mayor prioridad cuando un médico esté disponible. Esa es la idea detrás de las colas de prioridad: se comportan como colas regulares y sencillas, excepto que el frente de la cola se determina dinámicamente en función de algún tipo de prioridad. Las diferencias que introduce la prioridad en la implementación son profundas, lo suficiente como para merecer un tipo especial de estructura de datos.
+
+Pero eso no es todo: incluso podemos definir contenedores básicos como bolsas o pilas como casos especiales de colas de prioridad. Este es un tema interesante para profundizar en la comprensión del funcionamiento de las colas de prioridad, aunque en la práctica esos contenedores usualmente se implementan de forma ad hoc, ya que podemos lograr un mejor rendimiento aprovechando sus características específicas.
+
+#### Estructuras de datos concretas
+
+Pasemos ahora de las estructuras de datos abstractas a las concretas. Conocer cómo funciona la API de una cola de prioridad es suficiente para utilizarla, pero a menudo no es suficiente para usarla de manera óptima. Especialmente en componentes críticos en tiempo o en aplicaciones intensivas en datos, es necesario comprender los detalles internos de las estructuras de datos y de su implementación para asegurarnos de poder integrarla en nuestra solución sin introducir un cuello de botella.
+
+Toda abstracción debe implementarse utilizando una estructura de datos concreta. Por ejemplo, una pila se puede implementar usando una lista, un arreglo o, en teoría, incluso un heap. La elección de la estructura de datos subyacente influirá únicamente en el rendimiento del contenedor. Escoger la mejor implementación suele ser un compromiso: algunas estructuras de datos aceleran ciertas operaciones, pero harán que otras sean más lentas.
+
+#### Comparando el rendimiento
+
+Para la implementación de una cola de prioridad, inicialmente consideraremos tres alternativas ingenuas utilizando las estructuras de datos fundamentales:
+
+- **Arreglo no ordenado:** simplemente se añaden elementos al final.
+- **Arreglo ordenado:** se restablece el orden cada vez que se añade un nuevo elemento.
+- **Árboles balanceados:** de los cuales los *heaps* son un caso especial.
+
+Comparemos, en la tabla 1, los tiempos de ejecución para operaciones básicas implementadas con estas estructuras de datos.
+
+#### Tabla 1: Rendimiento para las operaciones de las colas de prioridad
+
+| Operación        | Arreglo no ordenado | Arreglo ordenado | Árbol balanceado |
+| ---------------- | ------------------- | ---------------- | ---------------- |
+| Insertar         | O(1)                | O(n)             | O(log n)         |
+| Encontrar mínimo | O(1)¹               | O(1)             | O(1)¹            |
+| Eliminar mínimo  | O(n)²               | O(1)³            | O(log n)         |
+
+¹ Se asume que se guarda un valor extra con el mínimo y se asume el costo de mantenerlo al insertar y eliminar.  
+² Si se usa un búfer para acelerar la búsqueda del mínimo, al eliminar se debe encontrar el siguiente mínimo.  
+³ Al almacenar el arreglo en orden inverso, eliminar el último elemento podría ser solo cuestión de reducir el tamaño del arreglo o llevar la cuenta del último elemento.
+
+Además, la mayoría de las veces los contenedores, y las colas de prioridad en particular, se usan como estructuras de soporte, lo que significa que forman parte de algoritmos o estructuras de datos más complejos. Cada ciclo del algoritmo principal puede llamar a operaciones en la cola de prioridad varias veces. Por ejemplo, para un algoritmo de ordenamiento, esto podría significar pasar de `O(n²)` (inviable para n tan grande como 1 millón o incluso menos) a `O(nlog(n))`, lo que sigue siendo tratable incluso para entradas de tamaño de 1 billón o más. Sin embargo, esto tiene un costo, ya que la implementación de árboles binarios balanceados generalmente no es trivial.
