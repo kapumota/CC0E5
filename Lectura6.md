@@ -130,6 +130,123 @@ function update(oldValue, newPriority)
   
 El rendimiento de esta operación depende, en primer lugar, de la eficiencia en la búsqueda del elemento a actualizar. En implementaciones simples esta búsqueda puede ser lineal; sin embargo, es común emplear estructuras auxiliares (como un mapa hash) para lograr búsquedas en tiempo amortizado O(1). Además, las funciones bubbleUp y pushDown, que se aplican después de la actualización, tienen una complejidad logarítmica.
 
+#### Manejo de duplicados
+
+Hasta ahora hemos asumido que nuestro heap no contiene duplicados. Sin embargo, si esta suposición no se cumple, debemos enfrentar desafíos adicionales, en particular, definir el orden a seguir cuando existan elementos duplicados.
+
+**El problema**
+
+Considera el siguiente escenario:  
+- Tenemos dos duplicados, a los que llamaremos **X** e **Y**, siendo uno hijo del otro.  
+- Supongamos que **X** es hijo de **Y** y se llama al método `update` para aumentar la prioridad de **X**.
+
+Dentro de `update`, después de ajustar las prioridades de ambos elementos, se deben ejecutar dos llamadas a `bubbleUp`: una para **X** y otra para **Y**.  
+Si se ejecutan en el orden incorrecto, podría generarse un heap inconsistente, violando las propiedades fundamentales de la estructura.
+
+**Ejemplo del problema**
+
+- **Caso 1:**  
+  Se hace llamar `bubbleUp(X)` primero.  
+  - **X**, al compararse con su padre **Y**, encuentra que ambos tienen el mismo valor (o que **Y** no cumple la condición para intercambiarse) y se detiene.  
+  - Posteriormente, al llamar `bubbleUp(Y)`, se descubre que el padre de **Y** tiene una prioridad menor, lo que hace que **Y** ascienda.  
+  - Como consecuencia, **X** no se vuelve a reexaminar y permanece en una posición incorrecta, dejando el heap fuera de balance.
+
+**Posibles soluciones**
+
+- **Orden de llamadas:**  
+  Ejecutar las llamadas a `bubbleUp` siguiendo un orden de izquierda a derecha garantiza que, al actualizar cada nodo, se verifiquen las relaciones padre-hijo de forma consistente.
+
+- **Ajuste de condiciones:**  
+  Modificar las condiciones en `bubbleUp` y en el método complementario `pushDown` para detener el proceso solo cuando se encuentre:
+  - Un padre con una prioridad **estrictamente mayor** (y, respectivamente, hijos con prioridad **estrictamente menor**).
+
+- **Actualización dinámica:**  
+  Permitir que los nodos se ajusten (ascendiendo o descendiendo) conforme se actualizan.  
+  Esta alternativa, aunque posible, generalmente implica un mayor número de intercambios y puede afectar el rendimiento en el peor de los casos.
+
+#### Heapify
+
+La inicialización de un heap puede realizarse de dos formas:
+
+1. **Inserción secuencial:**  Crear un heap vacío y añadir los elementos uno por uno, lo que tiene una complejidad de O(n log n).
+
+2. **Heapify directo:**  Inicializar el heap con el conjunto completo de n elementos en cualquier orden y luego reorganizar el arreglo para cumplir las propiedades del heap.
+
+**Concepto y procedimiento**
+
+Cada posición del arreglo se puede considerar la raíz de un subheap. Las hojas son subheaps triviales (con un solo elemento) y, por lo tanto, ya cumplen la propiedad del heap.
+
+**Pseudocódigo de método heapify**
+
+```pseudo
+function heapify(pairs)
+  for index in { (|pairs| - 1) / D  ..  0 } do     
+    pushDown(pairs, index)
+```
+
+- **D:** Factor de ramificación (por ejemplo, D = 2 para un heap binario).  
+- **pushDown:** Se encarga de asegurar que el subheap con raíz en el índice dado sea un heap válido.
+
+**Análisis del tiempo de ejecución**
+
+En un heap binario:
+- Aproximadamente la mitad de los nodos son hojas, las cuales requieren a lo sumo un intercambio.
+- Los subheaps de mayor altura (más cercanos a la raíz) requieren más intercambios, pero su número es menor.
+
+El análisis completo muestra que el número total de intercambios está limitado por una serie geométrica. Esto implica que, en el peor de los casos, la complejidad de `heapify` es **O(n)**.
+
+#### Más allá de la API: verificación de existencia (*contains*)
+
+Una de las operaciones para las que los heaps no están optimizados es la verificación de si un elemento se encuentra en la estructura. Sin una estrategia adicional, se requiere recorrer todo el arreglo, lo que implica una complejidad **O(n)**.
+
+**Soporte para incrementos/decrementos de prioridad**
+
+En aplicaciones donde es fundamental modificar la prioridad de un elemento de manera eficiente, se sugiere:
+- Agregar un campo auxiliar (por ejemplo, un **HashMap**) que mapea cada elemento a su posición en el heap.  
+- Esto permite que la operación `contains` (y la búsqueda de la posición del elemento) se realice en tiempo constante, en promedio.
+
+**Pseudocódigo del método contains**
+
+```pseudo
+function contains(elem)
+  index ← elementToIndex[elem]
+  return index >= 0
+```
+
+**Supuestos:**
+- `elementToIndex[elem]` retorna -1 por defecto si el elemento no se encuentra.
+- No se permiten claves duplicadas. Si existieran duplicados, se debería almacenar una lista de índices por cada clave.
+
+
+#### Rendimiento
+
+Se resumen a continuación las operaciones principales de un heap, sus tiempos de ejecución y el espacio extra requerido:
+
+**Tabla: operaciones en heaps (con `n` elementos)
+
+| Operación         | Tiempo de ejecución | Espacio extra     |
+| ----------------- | ------------------- | ----------------- |
+| **Insertar**      | O(log n)            | O(1)              |
+| **Top**           | O(log n)            | O(1)              |
+| **Remover**       | O(log n)¹           | O(n)¹             |
+| **Peek**          | O(1)                | O(1)              |
+| **Contains (ingenuo)** | O(n)          | O(1)              |
+| **Contains (avanzado)** | O(1)¹         | O(n)¹             |
+| **UpdatePriority**| O(log n)¹           | O(n)¹             |
+| **Heapify**       | O(n)                | O(1)              |
+
+¹ Usando la versión avanzada de `contains` y manteniendo un mapa extra de elementos a índices.
+
+#### Consideraciones de tiempo y espacio
+
+- **Trade-off entre tiempo y espacio:**  Algoritmos que consumen espacio cuadrático pueden ser aceptables para volúmenes pequeños, pero en escenarios con grandes volúmenes de datos (big data), es preferible utilizar algoritmos que requieran espacio constante o logarítmico.
+
+- **Garantías amortizadas:**  Para operaciones como `insert` y `top`, si se utiliza un arreglo dinámico, algunas llamadas pueden requerir tiempo lineal durante la redimensión. Sin embargo, se garantiza que, en promedio, el rendimiento es logarítmico.
+
+- **Importancia de una estructura auxiliar:**  El rendimiento de `remove` y `updatePriority` depende de una implementación eficiente de `contains`. Esto generalmente requiere una segunda estructura de datos (por ejemplo, una tabla hash o un filtro Bloom) para lograr búsquedas eficientes.
+
+- **Optimización en lenguajes gestionados:**  En lenguajes como Java, se recomienda inicializar los heaps a un tamaño esperado si se tiene una estimación razonable, para evitar costosos redimensionamientos y mejorar la eficiencia en la asignación y recolección de basura.
+
 #### Integración de las operaciones en la API del Heap
 
 Con las funciones auxiliares bubbleUp y pushDown bien definidas, las operaciones principales del heap (insert, top y update) se simplifican considerablemente. Cada operación se apoya en estas funciones para garantizar que, tras cualquier modificación (ya sea la adición, extracción o actualización de un elemento), las propiedades del heap se mantengan sin violaciones:
