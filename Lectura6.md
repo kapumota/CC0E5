@@ -4,7 +4,7 @@ El manejo eficiente de un heap requiere el uso de operaciones auxiliares que gar
 
 Además, se cuenta con operaciones que permiten la inserción de nuevos elementos, la extracción del elemento superior y la actualización de la prioridad de un elemento existente. A continuación se presentan en detalle las operaciones pushDown, insert, top y update.
 
-#### Operación PushDown
+#### Operación pushDown
 
 El método **pushDown** se utiliza cuando un elemento, al haber sufrido una modificación o tras la eliminación de la raíz, podría violar la invariante de prioridad en relación con sus hijos. Aunque el elemento modificado mantenga la propiedad respecto a su padre, es posible que, al compararlo con sus hijos, se encuentre que alguno de ellos posee una prioridad superior. 
 
@@ -188,6 +188,6 @@ Cada una de las operaciones presentadas (pushDown, insert, top y update) se cent
 3. **Integridad del arreglo:**  
    La representación en arreglo del heap permite acceder de forma eficiente a los elementos. Las operaciones de inserción y eliminación se aprovechan de la facilidad para añadir o quitar elementos del final del arreglo, y se garantizan mediante métodos auxiliares que reubican el elemento modificado sin necesidad de redirigir punteros.
 
-El correcto funcionamiento del heap depende de la coordinación entre estas propiedades y de la implementación modular de las operaciones. Cada cambio –ya sea la inserción de un nuevo elemento, la actualización de la prioridad de uno existente o la extracción del elemento superior– se realiza de forma que la estructura global se mantiene coherente y lista para futuras operaciones.
+El correcto funcionamiento del heap depende de la coordinación entre estas propiedades y de la implementación modular de las operaciones. Cada cambio, ya sea la inserción de un nuevo elemento, la actualización de la prioridad de uno existente o la extracción del elemento superior– se realiza de forma que la estructura global se mantiene coherente y lista para futuras operaciones.
 
 La combinación de estas técnicas permite que el heap actúe como una estructura de datos muy versátil y eficiente en contextos de alta demanda, donde la rapidez en la selección del elemento "más importante" es crucial. Además, la posibilidad de ajustar el criterio de prioridad de forma parametrizable hace que esta estructura se adapte a una amplia variedad de escenarios, sin necesidad de reescribir la lógica subyacente.
