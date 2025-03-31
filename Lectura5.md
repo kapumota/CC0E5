@@ -1,6 +1,4 @@
-### Implementación y análisis de heaps
-
-En esta lectura se explica en detalle qué es un heap, sus propiedades fundamentales, la representación en arreglo, las variantes en función de la prioridad y la ramificación, y cómo se implementa mediante métodos clave como el "bubbleUp". 
+### Heaps: Fundamentos, estructura y optimización
 
 #### Definición y estructura de un heap
 
@@ -103,7 +101,7 @@ Con la base teórica asentada, se aborda ahora la implementación práctica de u
 
 Para resolver estos problemas, se definen dos funciones auxiliares que ayudan a restablecer las propiedades del heap: una para "ascender" (bubbleUp) y otra (no descrita en el fragmento proporcionado) para "descender" (comúnmente conocida como "siftDown" o "bubbleDown"). 
 
-#### El método BubbleUp
+#### El método bubbleUp
 
 El método **bubbleUp** se invoca cuando un elemento tiene una prioridad mayor que la de su padre. Este método tiene la finalidad de mover el elemento "hacia arriba" en el heap 
 hasta que se encuentre en la posición correcta, es decir, hasta que su prioridad sea menor o igual a la de su nuevo padre o hasta que alcance la raíz.
@@ -126,19 +124,19 @@ function bubbleUp(pairs, index=|pairs|-1)
 
 **Explicación de cada paso:**
 
-1. **Inicialización**: Se recibe el arreglo `pairs`, que contiene todas las tuplas (elemento, prioridad), y se utiliza un índice, por defecto el último elemento insertado (línea 1).  
-2. **Inicio del proceso**: Se asigna el valor del índice actual a `parentIndex` y se entra en el ciclo mientras `parentIndex` sea mayor que 0 (línea 3).  
-3. **Comparación de prioridades**: Se actualiza el `currentIndex` al valor actual de `parentIndex`, y luego se calcula el índice del padre mediante la función `getParentIndex` (línea 4).  
-4. **Intercambio si es necesario**: Si la prioridad del elemento en el padre es menor que la del elemento actual (línea 5), se procede a intercambiar ambos elementos (línea 6).  
-5. **Terminación**: Si no se cumple la condición, se asume que el orden del heap se ha restablecido y se termina el ciclo (línea 7).
+1. **Inicialización**: Se recibe el arreglo `pairs`, que contiene todas las tuplas (elemento, prioridad), y se utiliza un índice, por defecto el último elemento insertado.
+2. **Inicio del proceso**: Se asigna el valor del índice actual a `parentIndex` y se entra en el ciclo mientras `parentIndex` sea mayor que 0.  
+3. **Comparación de prioridades**: Se actualiza el `currentIndex` al valor actual de `parentIndex`, y luego se calcula el índice del padre mediante la función `getParentIndex` . 
+4. **Intercambio si es necesario**: Si la prioridad del elemento en el padre es menor que la del elemento actual, se procede a intercambiar ambos elementos (línea 6).  
+5. **Terminación**: Si no se cumple la condición, se asume que el orden del heap se ha restablecido y se termina el ciclo.
 
 Este método realiza, en cada iteración, una comparación e intercambio que, en el peor caso, se repite tantas veces como la altura del heap, la cual es logarítmica respecto al número de elementos almacenados.
 
-##### Ejemplo conceptual del BubbleUp
+##### Ejemplo conceptual del bubbleUp
 
 Imaginemos que en un max-heap (donde los números mayores representan mayor prioridad) se inserta un nuevo elemento con prioridad 9 en la posición 7. Si el padre de este elemento, ubicado en la posición 2, tiene una prioridad de 8, la condición para intercambiar se cumple. Tras el primer intercambio, el elemento con prioridad 9 se mueve a la posición 2. En la siguiente iteración, se compara con el nuevo padre (en la raíz, por ejemplo, con prioridad 10). Al no cumplirse la condición de intercambio (ya que 10 no es menor que 9), el método termina, dejando al elemento en la posición correcta.
 
-##### Optimización del BubbleUp
+##### Optimización del bubbleUp
 
 Si bien la implementación descrita intercambia el elemento en cada iteración, existe una mejora que reduce el número de asignaciones. En la implementación ingenua se realizan tres asignaciones por cada intercambio, lo cual puede ser costoso en términos de rendimiento, especialmente cuando el elemento tiene que subir varios niveles.
 
@@ -161,10 +159,9 @@ function bubbleUp(pairs, index=|pairs|-1)
 
 **Desglose del pseudocódigo optimizado:**
 
-- **Inicialización**: Se asigna a la variable `current` el elemento del arreglo `pairs` ubicado en la posición indicada por `index` (línea 2). Esta variable guarda el elemento que debe “ascender”.
-- **Recorrido del camino**: Mientras el índice actual sea mayor que 0, se obtiene el índice del padre con la función `getParentIndex` (línea 4).
-- **Comparación sin intercambio inmediato**: Se verifica si la prioridad del elemento en el padre es menor que la de `current`. Si es así, se copia el elemento del padre a la posición actual (línea 5) y se actualiza el índice a la posición del padre (línea 6). Este movimiento "baja" el elemento del padre en la jerarquía.
-- **Inserción final**: Una vez se encuentra el lugar correcto (cuando la condición deja de cumplirse o se alcanza la raíz), se copia el elemento almacenado en `current` a la posición determinada (línea 8).
+- **Inicialización**: Se asigna a la variable `current` el elemento del arreglo `pairs` ubicado en la posición indicada por `index`. Esta variable guarda el elemento que debe "ascender".
+- **Recorrido del camino**: Mientras el índice actual sea mayor que 0, se obtiene el índice del padre con la función `getParentIndex`.
+- **Comparación sin intercambio inmediato**: Se verifica si la prioridad del elemento en el padre es menor que la de `current`. Si es así, se copia el elemento del padre a la posición actual (línea 5) y se actualiza el índice a la posición del padre. Este movimiento "baja" el elemento del padre en la jerarquía.
+- **Inserción final**: Una vez se encuentra el lugar correcto (cuando la condición deja de cumplirse o se alcanza la raíz), se copia el elemento almacenado en `current` a la posición determinada.
 
 Con esta optimización se evitan múltiples asignaciones redundantes, ya que el elemento "asciende" de forma acumulativa sin realizar intercambios completos en cada iteración. En el peor de los casos, para un camino de altura `H` se realizan `H+1` asignaciones, lo que representa una mejora significativa (ahorrando aproximadamente un 66 % en el número de asignaciones)  respecto a la versión ingenua.
-
