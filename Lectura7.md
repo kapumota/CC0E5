@@ -175,115 +175,12 @@ Como ejemplo, se puede considerar la siguiente tabla de compresión derivada de 
 
 En esta tabla, cada secuencia de bits cumple la propiedad de código prefijo, lo que significa que ninguna secuencia es el prefijo de otra. Esta propiedad es esencial para la decodificación del mensaje comprimido, ya que permite determinar de manera única la separación de los códigos en la secuencia binaria.
 
-#### 4. Implementación en Python
 
-Para ilustrar la transición del pseudocódigo a una implementación real, se presenta a continuación un ejemplo simplificado en Python que muestra cómo se podrían implementar algunas de las funciones clave, en particular las operaciones utilizadas en el algoritmo de Huffman y en la selección de los `k` elementos más grandes.
-
-##### 4.1 Ejemplo de código para el algoritmo de Huffman
-
-```python
-class TreeNode:
-    def __init__(self, chars, frequency):
-        self.chars = chars          # Lista o cadena de caracteres
-        self.frequency = frequency  # Frecuencia combinada de los caracteres
-        self.left = None            # Hijo izquierdo
-        self.right = None           # Hijo derecho
-
-def compute_frequencies(text):
-    freq = {}
-    for char in text:
-        freq[char] = freq.get(char, 0) + 1
-    total = sum(freq.values())
-    # Normalizar las frecuencias
-    for char in freq:
-        freq[char] /= total
-    return freq
-
-import heapq
-
-def huffman(text):
-    char_freq = compute_frequencies(text)
-    # Crear la cola de prioridad como un min-heap
-    heap = []
-    for char, frequency in char_freq.items():
-        node = TreeNode(char, frequency)
-        heapq.heappush(heap, (frequency, node))
-    
-    # Combinar nodos hasta que solo quede uno en el heap
-    while len(heap) > 1:
-        left_freq, left_node = heapq.heappop(heap)
-        right_freq, right_node = heapq.heappop(heap)
-        parent = TreeNode(left_node.chars + right_node.chars, left_freq + right_freq)
-        parent.left = left_node
-        parent.right = right_node
-        heapq.heappush(heap, (parent.frequency, parent))
-    
-    # La raíz del árbol es el único nodo restante
-    _, root = heap[0]
-    return build_table(root, "")
-
-def build_table(node, sequence):
-    table = {}
-    def traverse(n, seq):
-        if len(n.chars) == 1:
-            table[n.chars] = seq
-        else:
-            if n.left is not None:
-                traverse(n.left, seq + "0")
-            if n.right is not None:
-                traverse(n.right, seq + "1")
-    traverse(node, sequence)
-    return table
-
-# Ejemplo de uso
-texto = "AAABBCDEFAAA"
-compression_table = huffman(texto)
-print("Tabla de compresión:", compression_table)
-```
-
-**Aspectos del código:**
-
-- La función *compute_frequencies* calcula la frecuencia de cada carácter y normaliza los valores.
-- Se utiliza la librería *heapq* de Python para implementar la cola de prioridad como un min-heap. Cada elemento del heap es una tupla formada por la frecuencia y el nodo correspondiente.
-- El bucle principal del algoritmo extrae los dos nodos con la frecuencia menor, crea un nuevo nodo combinando ambos y lo vuelve a insertar en el heap.
-- La función *build_table* recorre el árbol de Huffman para construir la tabla de compresión, asignando a cada carácter la secuencia de bits obtenida desde la raíz.
-
-##### 4.2 Ejemplo de código para la celección de los `k` elementos más grandes
-
-La siguiente implementación muestra cómo utilizar un min-heap para mantener los `k` elementos más grandes de un conjunto:
-
-```python
-def topK(A, k):
-    # Usamos heapq para implementar un min-heap
-    heap = []
-    for el in A:
-        # Si el heap tiene k elementos, comparar el elemento actual con el mínimo
-        if len(heap) == k and heap[0] < el:
-            heapq.heappop(heap)
-        if len(heap) < k:
-            heapq.heappush(heap, el)
-    return heap
-
-# Ejemplo de uso
-A = [2, 4, 1, 3, 7, 6]
-k = 3
-k_largest = topK(A, k)
-print("Los k elementos más grandes son:", k_largest)
-```
-
-**Aspectos destacados:**
-
-- Se recorre la lista de elementos A.
-- Si el heap ya contiene `k` elementos, se verifica si el nuevo elemento es mayor que la raíz del min-heap.
-- En caso afirmativo, se extrae la raíz y se inserta el nuevo elemento, manteniendo el tamaño del heap en `k`.
-- Al final, el heap contendrá los `k` elementos más grandes.
-
-
-#### 5. Otras aplicaciones de heaps en diversos contextos
+#### 4. Otras aplicaciones de heaps en diversos contextos
 
 Los heaps son estructuras de datos versátiles que se utilizan en una amplia variedad de aplicaciones. Además de la selección de los `k` elementos más grandes y la compresión de datos, destacan los siguientes casos de uso:
 
-##### 5.1 Aplicaciones en grafos
+##### 4.1 Aplicaciones en grafos
 
 - **Dijkstra y A\*:**  
   Los algoritmos para encontrar el camino más corto en grafos (como Dijkstra y A\*) dependen de una cola de prioridad para seleccionar el vértice con la distancia mínima en cada paso. La eficiencia del algoritmo mejora significativamente cuando se utiliza un heap para gestionar los vértices pendientes de procesar.
@@ -291,16 +188,16 @@ Los heaps son estructuras de datos versátiles que se utilizan en una amplia var
 - **Algoritmo de Prim:**  
   Para encontrar el árbol de expansión mínima (MST) en un grafo no dirigido, el algoritmo de Prim utiliza una cola de prioridad para determinar cuál es la arista de menor peso que conecta el conjunto de vértices ya incluidos en el MST con el resto del grafo. La implementación con heaps permite reducir la complejidad de la operación de selección y actualización de vértices.
 
-##### 5.2 Compresión de datos con códigos de Huffman
+##### 4.2 Compresión de datos con códigos de Huffman
 
 Como se ha descrito anteriormente, la construcción de códigos de Huffman es otro caso de uso emblemático de los heaps. La capacidad para extraer rápidamente los dos elementos con la menor frecuencia permite construir el árbol de codificación de forma eficiente. La técnica de fusión de nodos basada en una cola de prioridad es la clave para lograr una compresión efectiva y para garantizar que el código resultante sea un código prefijo.
 
-##### 5.3 Procesamiento en flujos de datos
+##### 4.3 Procesamiento en flujos de datos
 
 En situaciones donde los datos se reciben de forma continua (por ejemplo, flujos de datos en tiempo real), el uso de un min-heap limitado a 
 `k` elementos permite mantener siempre los `k` elementos más grandes vistos hasta el momento sin necesidad de almacenar todo el conjunto de datos. Esta característica resulta especialmente útil en aplicaciones de monitoreo y análisis en tiempo real, donde el volumen total de datos puede ser muy elevado, pero solo es necesario conservar un subconjunto representativo.
 
-#### 6. Aspectos generales en la aplicación de heaps
+#### 5. Aspectos generales en la aplicación de heaps
 
 La elección de la estructura de datos adecuada es crucial en el diseño de algoritmos eficientes. En el caso de los heaps, es importante tener en cuenta varios factores:
 
