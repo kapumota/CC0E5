@@ -2,6 +2,15 @@
 
 Este curso avanzado explora las estructuras de datos más utilizadas en el desarrollo de software moderno, así como técnicas avanzadas para optimización, búsqueda y procesamiento eficiente en diferentes contextos: memoria interna, externa, grafos y clustering. Se brindan conocimientos tanto teóricos como prácticos que permitirán comprender el rendimiento de algoritmos y estructuras aplicadas en sistemas reales.
 
+#### Donde practicar
+
+- [Codeforces](https://codeforces.com)
+- [DMOJ](https://dmoj.ca)
+- [Kattis](https://open.kattis.com)
+- [POJ](https://poj.org)
+- [SPOJ](https://spoj.com)
+- [UVa](https://uva.onlinejudge.org)
+
 
 ### Índice
 
