@@ -103,7 +103,7 @@ El análisis empírico, basado en los datos de profiling, permite determinar que
 
 **Rol y funcionamiento de la operación heapify**
 
-La función `_heapify` es fundamental en la construcción del heap, ya que a partir de una lista desordenada de pares (prioridad, elemento) se construye una estructura que cumple con las invariantes del heap. Este proceso se realiza de manera eficiente mediante la aplicación de la función _push_down a cada nodo interno, empezando desde el último nodo que tiene hijos y avanzando hacia la raíz.
+La función `_heapify` es fundamental en la construcción del heap, ya que a partir de una lista desordenada de pares (prioridad, elemento) se construye una estructura que cumple con las invariantes del heap. Este proceso se realiza de manera eficiente mediante la aplicación de la función `_push_down` a cada nodo interno, empezando desde el último nodo que tiene hijos y avanzando hacia la raíz.
 
 El procedimiento se basa en la idea de que, al ajustar los nodos en orden inverso, se garantiza que al llegar a la raíz, todos los subárboles ya cumplen con la propiedad del heap. Esta técnica, aunque conceptualmente simple, puede presentar ciertos comportamientos "misteriosos" en cuanto al número de intercambios (swaps) realizados durante el proceso.
 
@@ -126,7 +126,7 @@ return n / D * sum([math.ceil(h / (D**h)) for h in range(int(math.log(n, D)))])
 Esta expresión busca capturar el comportamiento del heapify considerando dos factores clave:
 
 - **El número de nodos internos**: Aproximadamente `n/D`, que corresponde a la cantidad de nodos que tienen al menos un hijo.
-- **La suma de intercambios en cada nivel**: Se estima a través de una suma que involucra la función `math.ceil` aplicada a una relación que decrece exponencialmente en función de `D` y la altura `h`` del nodo.
+- **La suma de intercambios en cada nivel**: Se estima a través de una suma que involucra la función `math.ceil` aplicada a una relación que decrece exponencialmente en función de `D` y la altura `h` del nodo.
 
 La función suma, a lo largo de h desde 0 hasta logaritmo en base `D` de `n`, una cantidad que intenta reflejar la cantidad máxima de intercambios necesarios en cada nivel del heap. La utilización de `math.ceil` garantiza que se cuente al menos un intercambio en niveles donde la división no resulte en un número entero, lo que es fundamental para obtener una cota superior del número de swaps.
 
