@@ -404,7 +404,7 @@ int main(int argc, char* argv[]) {
         rootInterval = intervalTreapInsert(rootInterval, itv);
     }
     
-    cout << "Treap de Intervalos (in-order):" << endl;
+    cout << "Treap de intervalos (in-order):" << endl;
     inorderIntervals(rootInterval);
     cout << endl;
     
