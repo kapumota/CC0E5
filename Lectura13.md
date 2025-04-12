@@ -4,6 +4,7 @@ Los treaps son estructuras de datos que combinan las propiedades de un árbol bi
 
 La naturaleza probabilística de los treaps permite esquivar ciertas complicaciones asociadas al balanceo estricto de otras estructuras, como los árboles AVL o los árboles rojo-negro. Además, la incorporación de información adicional en cada nodo posibilita extender la funcionalidad de la estructura para realizar operaciones de consulta y actualización avanzadas. Debido a su flexibilidad, se han utilizado en diversas aplicaciones, abarcando desde algoritmos clásicos hasta escenarios altamente paralelizables y sistemas distribuidos.
 
+> Puedes revisar algunas implementación [aqui](https://github.com/kapumota/CC0E5/tree/main/aplicaciones_treaps) en C++.
 
 ### 1. Algoritmos clásicos
 
