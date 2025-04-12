@@ -1,6 +1,6 @@
 ### [Treaps de intervalos](https://github.com/kapumota/CC0E5/blob/main/aplicaciones_treaps/treap_intervalos.cpp) 
 
-### 1. Estructura y funcionalidad del código
+#### 1. Estructura y funcionalidad del código
 
 El código implementa dos variantes de treap en C++:
 
@@ -24,7 +24,7 @@ El código implementa dos variantes de treap en C++:
   - **Inserción (`intervalTreapInsert`):** Inserta un intervalo ordenando los nodos por el valor inicial del intervalo. Después de cada inserción, se actualiza el valor `maxEnd` del nodo.  
   - **Consulta de intersección (`intersectingIntervals`):** Dado un intervalo de consulta, recorre el treap para identificar y recolectar aquellos intervalos que se solapan, utilizando la función `doOverlap` para determinar la superposición.
 
-### 2. Funciones adicionales
+#### 2. Funciones adicionales
 
 #### a) **Pruebas unitarias (`runUnitTests`)**
 
@@ -44,38 +44,38 @@ El código implementa dos variantes de treap en C++:
   - **Consultas k-ésimas:** Se realizan 100 consultas distribuidas a lo largo del árbol para obtener el k-ésimo elemento, midiendo también su tiempo de ejecución.  
 - El uso de la biblioteca `<chrono>` permite medir con precisión el tiempo en milisegundos.
 
-### 3. Modos de ejecución
+#### 3. Modos de ejecución
 
 El programa admite tres modos de ejecución determinados por argumentos de línea de comandos:
 
 - **Modo test:**  
   Ejecutar  
   ```bash
-  ./programa test
+  ./treap_intervalos test
   ```  
   Llama a `runUnitTests()` para validar el funcionamiento de las operaciones.
 
 - **Modo profiling:**  
   Ejecutar  
   ```bash
-  ./programa profile
+  ./treap_intervalos profile
   ```  
   Llama a `runProfiling()` para medir el rendimiento en operaciones masivas.
 
 - **Modo demostración:**  
   Ejecutar sin argumentos  
   ```bash
-  ./programa
+  ./treap_intervalos
   ```  
   Se ejecuta una demostración que realiza operaciones básicas en ambos treaps (inserciones, búsquedas, eliminación y consultas de intervalos).
 
-### 4. Compilación e integración con CMake
+#### 4. Compilación e integración con CMake
 
 #### a) **Compilación con g++**
 
 Puedes compilar el código (guardado en `treap_intervalos.cpp`) con el siguiente comando:
 ```bash
-g++ -std=c++11 -O2 treap_intervalos.cpp -o programa
+g++ -std=c++11 -O2 treap_intervalos.cpp -o treap_intervalos
 ```
 Una vez compilado, utiliza las instrucciones mencionadas para cada modo.
 
@@ -104,7 +104,7 @@ Esto generará el ejecutable `programa`, el cual se puede ejecutar en cualquiera
 
 ### [Treaps y concurrencia](https://github.com/kapumota/CC0E5/blob/main/aplicaciones_treaps/treap_concurrencia.cpp)
 
-### 1. Estructura del código
+#### 1. Estructura del código
 
 #### a) **Nodos y funciones básicas**
 
@@ -139,7 +139,7 @@ La clase `ConcurrentTreap` encapsula la estructura del treap y agrega sincroniza
   - `printInorder()` y `getInorder()`: estas funciones muestran el recorrido in-order, siendo `getInorder()` especialmente útil para validar resultados en pruebas unitarias.
 
 
-### 2. Funcionalidades adicionales
+#### 2. Funcionalidades adicionales
 
 #### a) **Pruebas unitarias**
 
@@ -163,33 +163,33 @@ En la función `runProfiling()` se ejecuta un test de rendimiento concurrente:
 
 Si no se pasan argumentos en la línea de comandos, se ejecuta `runDemo()`, donde se lanzan varios hilos (en este caso, 4) para realizar operaciones concurrentes con una cantidad reducida de acciones. Al final se imprime el contenido del treap y se realizan búsquedas secuenciales para demostrar el funcionamiento del sistema.
 
-### 3. Forma de ejecución
+#### 3. Forma de ejecución
 
 El programa admite tres modos de operación:
 
 - **Pruebas unitarias:**  
   Ejecuta:
   ```bash
-  ./programa test
+  ./treap_concurrencia test
   ```
   Esto ejecuta `runUnitTests()` para validar las operaciones básicas del treap concurrente.
 
 - **Profiling:**  
   Ejecuta:
   ```bash
-  ./programa profile
+  ./treap_concurrencia profile
   ```
   Ejecuta `runProfiling()` para medir el rendimiento concurrente del treap.
 
 - **Demostración:**  
   Ejecuta:
   ```bash
-  ./programa
+  ./treap_concurrencia
   ```
   Sin argumentos, se ejecuta `runDemo()` para mostrar el funcionamiento del treap en un escenario concurrente.
 
 
-### 4. Integración con CMake
+#### 4. Integración con CMake
 
 Para compilar el proyecto usando CMake, crea un archivo `CMakeLists.txt` en el directorio del proyecto con el siguiente contenido:
 
@@ -266,17 +266,17 @@ Esta función simula un entorno de alto volumen de operaciones (100,000 operacio
 El programa admite tres modos, configurables mediante argumentos en línea de comandos:
 - **Modo "test":**  
   ```bash
-  ./programa test
+  ./treap_distribuido test
   ```  
   Ejecuta las pruebas unitarias.
 - **Modo "profile":**  
   ```bash
-  ./programa profile
+  ./treap_distribuido profile
   ```  
   Ejecuta la rutina de profiling.
 - **Modo de demostración:**  
   ```bash
-  ./programa
+  ./treap_distribuido
   ```  
   Sin argumentos, se corre la demostración original, en la que se inserta un conjunto de registros, se muestran búsquedas y se simula un merge entre shards.
 
@@ -285,22 +285,22 @@ El programa admite tres modos, configurables mediante argumentos en línea de co
 #### a) Compilación con g++
 Para compilar el código con soporte para C++17, se puede usar el siguiente comando (considerando que el archivo se llama **treap_distribuido.cpp**):
 ```bash
-g++ -std=c++17 treap_distribuido.cpp -o programa
+g++ -std=c++17 treap_distribuido.cpp -o treap_distribuido
 ```
 Luego se ejecuta utilizando:
-- `./programa test`  
-- `./programa profile`  
-- `./programa`
+- `./treap_distribuido test`  
+- `./treap_distribuido profile`  
+- `./treap_distribuido`
 
 #### b) Ejemplo de CMakeLists.txt
 Para integrar el código en un proyecto con CMake, cree un archivo `CMakeLists.txt` con el siguiente contenido:
 ```cmake
 cmake_minimum_required(VERSION 3.10)
-project(TreapConcurrencia)
+project(TreapDistribuido)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(programa treap_concurrencia.cpp)
+add_executable(programa treap_distribuido.cpp)
 ```
 Pasos de compilación:
 1. Crear un directorio de compilación y entrar en él:
@@ -312,4 +312,194 @@ Pasos de compilación:
    cmake ..
    make
    ```
+### [Treaps para enrutamiento y redes](https://github.com/kapumota/CC0E5/blob/main/aplicaciones_treaps/treap_networks.cpp)
 
+
+#### 1. Estructura y funcionalidad del código
+
+#### a) Cola de Prioridad -TreapPriorityQueue
+
+- **Objetivo:**  
+  Permitir la planificación de paquetes según su prioridad. Para lograr que el paquete de mayor prioridad se encuentre en la raíz, se utiliza como "clave" en el árbol el valor negativo de la prioridad (–priority).
+
+- **Estructura:**  
+  Los paquetes se representan con la estructura `Packet`, que contiene un identificador, la prioridad y un contenido (string). Cada nodo del treap (struct `PQNode`) almacena un `Packet`, la clave calculada y un valor aleatorio (randVal) para mantener la propiedad de heap en el árbol.  
+  Se implementan funciones clásicas de inserción, rotaciones (rotateRight y rotateLeft), extracción del elemento superior (pqTop y pqPopRoot) y actualización del tamaño del subárbol.
+
+- **Operaciones:**  
+  La clase `TreapPriorityQueue` ofrece las funciones `push()`, `top()`, `pop()`, `empty()` y `size()`, las cuales permiten gestionar la inserción y extracción de paquetes en base a su prioridad.
+
+#### b) Tabla de enrutamiento – TreapRoutingTable
+
+- **Objetivo:**  
+  Gestionar la información de enrutamiento mediante entradas definidas por destino, nextHop y metric.  
+  La clave del BST se basa en el campo `destination` de cada `RouteEntry`.
+
+- **Estructura:**  
+  La estructura `RouteEntry` contiene los datos de una entrada de enrutamiento. Los nodos del treap para la tabla (struct `RouteNode`) almacenan estas entradas, junto con un valor aleatorio para la propiedad de heap y punteros a hijos.  
+  Se definen funciones de inserción, actualización (en caso de que ya exista la entrada, se actualiza el nextHop y metric), eliminación y búsqueda (rtInsert, rtErase y rtFind). También existe la función inorderPrint para imprimir las entradas en orden.
+
+
+#### 2. Funcionalidades adicionales
+
+#### a) Pruebas unitarias (runUnitTests)
+
+- **Propósito:**  
+  Validar el correcto funcionamiento de ambas estructuras.
+  
+- **Descripción:**  
+  - Para la cola de prioridad, se insertan varios paquetes y se comprueba que el paquete con mayor prioridad (por ejemplo, el que tenga prioridad 30) se encuentre en la raíz. Tras extraer el primer elemento, se valida que la nueva raíz corresponda al siguiente paquete con la siguiente mayor prioridad.
+  - Para la tabla de enrutamiento, se insertan varias entradas, se actualiza una de ellas y se eliminan otras, comprobando mediante `assert` que los resultados sean los esperados.
+
+#### b) Profiling (runProfiling)
+
+- **Propósito:**  
+  Medir el rendimiento de las operaciones sobre un gran número de elementos.
+  
+- **Descripción:**  
+  - Se realizan 100,000 inserciones seguidas de extracciones en la cola de prioridad, midiendo el tiempo total de ejecución.
+  - Asimismo, se insertan 100,000 rutas y se eliminan algunas de forma aleatoria en la tabla de enrutamiento, midiendo el tiempo de inserción y eliminación con la biblioteca `<chrono>`.
+
+
+#### 3. Modos de ejecución
+
+El programa se adapta según el argumento de línea de comandos:
+
+- **Modo test ("test")**:  
+  Ejecuta `runUnitTests()` para validar el comportamiento de las estructuras.
+  
+- **Modo profiling ("profile")**:  
+  Ejecuta `runProfiling()` para medir el rendimiento de un gran número de operaciones.
+  
+- **Modo demo (sin argumento)**:  
+  Se ejecuta la demostración original, mostrando cómo se insertan, procesan y eliminan paquetes en la cola de prioridad, y cómo se gestionan las rutas en la tabla de enrutamiento.
+
+**Ejemplo de ejecución:**
+```bash
+g++ -std=c++17 -O2 -o network_treap treap_networks.cpp
+./network_treap test      # Ejecuta las pruebas unitarias
+./network_treap profile   # Ejecuta profiling
+./network_treap           # Ejecuta la demo original
+```
+
+#### 4. Integración con CMake
+
+Para compilar este código como parte de un proyecto gestionado con CMake, se puede crear un archivo `CMakeLists.txt` con el siguiente contenido:
+
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(TreapNetworks)
+
+set(CMAKE_CXX_STANDARD 17)
+
+add_executable(network_treap treap_networks.cpp)
+```
+
+**Pasos para compilar con CMake:**
+1. Crear un directorio de compilación y acceder a él:
+   ```bash
+   mkdir build && cd build
+   ```
+2. Ejecutar CMake y compilar:
+   ```bash
+   cmake ..
+   make
+   ```
+Esto generará el ejecutable `network_treap`, que se podrá ejecutar en cualquiera de los modos indicados.
+
+### [Treaps de estructuras aleatorizadas](https://github.com/kapumota/CC0E5/blob/main/aplicaciones_treaps/treap_randomized_structs.cpp)
+
+#### 1. Componentes del código
+
+#### a) BST clásico (no balanceado)
+- **Implementación:**  
+  Se define la estructura `BSTNode` que contiene una clave entera y punteros a sus hijos.  
+- **Operaciones:**  
+  - `bstInsert()`: Inserta recursivamente una clave en el BST.  
+  - `bstFind()`: Realiza la búsqueda de una clave.  
+  - `bstHeight()`: Calcula la altura del árbol, como medida del balance (o falta de él).
+
+#### b) Treap (árbol aleatorizado)
+- **Implementación:**  
+  La estructura `TreapNode` almacena una clave, una prioridad aleatoria (generada con `rand()`) y punteros a los hijos.  
+- **Operaciones:**  
+  - `treapInsert()`: Inserta una clave respetando las propiedades de BST y de heap; se utilizan rotaciones (rotateRight/rotateLeft) para reestructurar el árbol según la prioridad.  
+  - `treapFind()`: Busca una clave en el Treap.  
+  - `treapHeight()`: Calcula la altura del Treap, indicador del balance interno.
+
+#### c) SkipList simplificado
+- **Implementación:**  
+  Se utiliza la estructura `SkipListNode` que almacena una clave y un vector de punteros (para cada nivel) y se define la estructura `SkipList` con un nodo header y un nivel actual.  
+- **Operaciones:**  
+  - `skipListInsert()`: Inserta una clave en el SkipList utilizando un nivel asignado aleatoriamente (mediante `randomLevel()`).
+  - `skipListFind()`: Busca una clave en el SkipList.
+  - `skipListHeight()`: En este caso, se toma el número de nodos en el nivel base como métrica aproximada de la “altura” o cantidad de elementos.
+
+
+#### 2. Módulos de pruebas y profiling
+
+El código incorpora dos funciones principales:
+
+- **Pruebas unitarias y de inserción masiva (`testAllStructures`):**  
+  Se genera un vector de NUM_OPER claves aleatorias y se insertan en cada estructura (BST, Treap y SkipList). Se miden los tiempos de inserción y se calcula la altura del BST y del Treap; en el SkipList se cuenta el número de nodos en el nivel 0, usándose como una métrica aproximada.
+
+- **Pruebas de búsqueda aleatoria (`testSearchAllStructures`):**  
+  Tras realizar la inserción en las tres estructuras, se generan claves de búsqueda aleatorias y se mide el tiempo que tarda cada estructura en encontrar (o no) dichas claves, contando el número total de aciertos.
+
+Estas pruebas se pueden ejecutar de dos modos:
+- **Modo "test":**  
+  Ejecuta ambas funciones de pruebas (inserción y búsqueda), validando la operación de cada estructura.
+- **Modo "profile":**  
+  Ejecuta las mismas funciones pero enfocado en medir y reportar los tiempos de ejecución y la “altura” (o longitud base en el SkipList).
+
+
+#### 3. Modo de ejecución y uso
+
+El programa se comporta de la siguiente manera según los parámetros recibidos en la línea de comandos:
+
+- **Modo test:**  
+  ```bash
+  ./randomized_structs test
+  ```  
+  Ejecuta `testAllStructures()` y `testSearchAllStructures()` y termina.
+
+- **Modo profile:**  
+  ```bash
+  ./randomized_structs profile
+  ```  
+  Ejecuta las mismas pruebas pero con un enfoque en la medición del rendimiento.
+
+- **Modo demo (sin argumentos):**  
+  ```bash
+  ./randomized_structs
+  ```  
+  Se ejecuta una demostración interactiva que muestra mensajes comparativos basados en los resultados de las pruebas.
+
+Para compilar el código se puede utilizar el siguiente comando:
+```bash
+g++ -std=c++17 -O2 -o randomized_structs randomized_structs.cpp
+```
+
+#### 4. Integración con CMake
+
+Para integrar este código en un proyecto CMake, crea un archivo `CMakeLists.txt` con el siguiente contenido:
+
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(RandomizedStructs)
+
+set(CMAKE_CXX_STANDARD 17)
+
+add_executable(randomized_structs treap_randomized_structs.cpp)
+```
+
+**Pasos para compilar con CMake:**
+1. Crear el directorio de compilación y acceder:
+   ```bash
+   mkdir build && cd build
+   ```
+2. Ejecutar CMake y compilar:
+   ```bash
+   cmake ..
+   make
+   ```
