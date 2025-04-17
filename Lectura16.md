@@ -60,7 +60,7 @@ Cuando los usuarios inician sesión en su correo, el cliente recibe una lista de
 
 Cada vez que un usuario escribe un correo e inserta un destinatario, primero verificamos el diccionario, y solo si el contacto no está en la libreta de direcciones mostramos una ventana emergente preguntando a los usuarios si desean guardar el nuevo contacto.
 
-De esta forma, nunca realizamos una llamada HTTP al servidor (y a su vez a la base de datos) para verificar si un contacto está en nuestra libreta de direcciones, y solo leemos de la base de datos una vez al iniciar (o la primera vez durante una sesión en que redactamos un correo electrónico).  
+De esta forma, nunca realizamos una llamada HTTP al servidor (y a su vez a la base de datos) para verificar si un contacto está en la libreta de direcciones, y solo leemos de la base de datos una vez al iniciar (o la primera vez durante una sesión en que redactamos un correo electrónico).  
 
 ### Estructuras de datos concretas
 
@@ -204,9 +204,9 @@ Existen algunas soluciones comúnmente usadas:
 - Utilizar una única función hash `H` pero inicializar una lista `L` de `k` valores aleatorios (y únicos). Para cada clave que se inserte/busque, se crean  `k` valores sumando o concatenando `L[i]` a la clave, y luego se les aplica `H`. (Recuerda que las funciones hash bien diseñadas producirán resultados muy diferentes ante pequeños cambios en la entrada). 
 - Utilizar doble o triple hasheo. 
 
-Aunque lo último no garantiza independencia entre las funciones hash generadas, se ha demostrado que podemos relajar esta restricción con un incremento mínimo en la tasa de falsos positivos. Para mantener las cosas simples, en nuestra implementación usamos doble hasheo con dos funciones hash independientes: [Murmur hashing](https://en.wikipedia.org/wiki/MurmurHash) y [Fowler-Noll-Vo](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) (fnv1) hashing.
+Aunque lo último no garantiza independencia entre las funciones hash generadas, se ha demostrado que podemos relajar esta restricción con un incremento mínimo en la tasa de falsos positivos. Para mantener las cosas simples, en la implementación usamos doble hasheo con dos funciones hash independientes: [Murmur hashing](https://en.wikipedia.org/wiki/MurmurHash) y [Fowler-Noll-Vo](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) (fnv1) hashing.
 
-El formato general de nuestra i-ésima función hash, para i entre 0 y `k-1`, será 
+El formato general de la i-ésima función hash, para i entre 0 y `k-1`, será 
 
 ```
 Hᵢ(key) = murmurhash(key) + i * fnv1(key) + i * i
@@ -214,8 +214,9 @@ Hᵢ(key) = murmurhash(key) + i * fnv1(key) + i * i
 
  ### Implementación
 
+Volviendo a la aplicación de contactos: ¿cómo usaríamos un bloom filter para hacerla más rápida? Pues necesitamos usarlo como un diccionario, así que vamos a crear un nuevo bloom filter cuando inicie la aplicación de correo electrónico, recuperar todos los contactos del servidor y agregarlos al bloom filter. 
 
-Volviendo a nuestra aplicación de contactos: ¿cómo usaríamos un bloom filter para hacerla más rápida? Bueno, como se mencionó, necesitamos usarlo como un diccionario, así que vamos a crear un nuevo Bloom filter cuando inicie nuestra aplicación de correo electrónico, recuperar todos los contactos del servidor y agregarlos al Bloom filter. El listado siguiente resume este proceso de inicialización.
+El listado siguiente resume este proceso de inicialización.
 
 ```
 //Arranque de una aplicación de correo electrónico
@@ -236,9 +237,9 @@ function initBloomFilter(server, minSize)
 - Recorre la lista de contactos.  
 - Para cada contacto, lo añade al Bloom filter.
 
-Una vez configurada nuestra aplicación de directorio, tenemos dos operaciones en las que estamos principalmente interesados: comprobar si un contacto está en la lista y agregar un nuevo contacto al directorio.
+Una vez configurada la aplicación de directorio, tenemos dos operaciones en las que estamos principalmente interesados: comprobar si un contacto está en la lista y agregar un nuevo contacto al directorio.
 
-Para la primera operación, mostrada en el listado siguiente, podemos comprobar el bloom filter, y si dice que el contacto nunca ha sido agregado, entonces tenemos nuestra respuesta, el contacto no está en el sistema. Si, sin embargo, el bloom filter devuelve `true`, entonces podría tratarse de un falso positivo, por lo que necesitamos contactar al servidor para corroborarlo.
+Para la primera operación, mostrada en el listado siguiente, podemos comprobar el bloom filter, y si dice que el contacto nunca ha sido agregado, entonces tenemos la respuesta, el contacto no está en el sistema. Si, sin embargo, el bloom filter devuelve `true`, entonces podría tratarse de un falso positivo, por lo que necesitamos contactar al servidor para corroborarlo.
 
 ```
 // Comprobando un correo electrónico
@@ -250,7 +251,7 @@ function checkContact(bloomFilter, server, contact)
     return false
 ```
 
-- El método `checkContact` verifica si un contacto de correo electrónico está almacenado en la aplicación. Toma un bloom filter, una fachada de servidor y el contacto a comprobar. Devuelve `true` si el contacto ya está en nuestra libreta de contactos.  
+- El método `checkContact` verifica si un contacto de correo electrónico está almacenado en la aplicación. Toma un bloom filter, una fachada de servidor y el contacto a comprobar. Devuelve `true` si el contacto ya está en la libreta de contactos.  
 - Comprueba el Bloom filter para el contacto pasado al método.  
 - Si el Bloom filter devolvió `true`, necesitamos verificar si el servidor realmente almacena el contacto, ya que podría tratarse de un falso positivo.  
 - De lo contrario, dado que los bloom filters no tienen falsos negativos (sino solo falsos positivos), podemos devolver `false`.
@@ -274,7 +275,7 @@ function addContact(bloomFilter, server, contact)
 
 #### Lectura y escritura de bits
 
-Ahora, pasemos a la implementación de un bloom filter, comenzando, como de costumbre, con los métodos auxiliares que nos darán los bloques básicos para construir la implementación de nuestra API.
+Ahora, pasemos a la implementación de un bloom filter, comenzando, como de costumbre, con los métodos auxiliares que nos darán los bloques básicos para construir la implementación de la API.
 
 En particular, necesitamos:
 
@@ -334,7 +335,9 @@ Supongamos que tenemos el buffer `B = [157, 25, 44, 204]` con `BITS_PER_INT = 8`
 - Llamamos a `readBit(B, 19)`; entonces obtenemos `element == 2`, `bit == 3`.  
   - `bitsArray[element]` evalúa a `44`.  
   - `(1 << bit)` es `8`.  
-  - `44 & 8` es `8`, y al desplazarlo obtenemos `1`.  
+  - `44 & 8` es `8`, y al desplazarlo obtenemos `1`.
+
+
 
 - Llamamos a `writeBit(B, 15)`; entonces obtenemos `element == 1`, `bit == 7`.  
   - `bitsArray[element]` evalúa a `25`.  
@@ -342,3 +345,148 @@ Supongamos que tenemos el buffer `B = [157, 25, 44, 204]` con `BITS_PER_INT = 8`
   - `25 | 128` es `153`.  
   - El buffer se actualiza a `B = [157, 153, 44, 204]`.
  
+##### Encontrar dónde se almacena una clave
+
+Para generar todos los índices de los bits usados para almacenar una clave, seguimos un proceso de dos pasos, descrito en el pseudocódigo. Ten en cuenta que nuestro objetivo final es transformar una cadena en *k* posiciones, entre 0 y *m* – 1.
+
+Primero, usamos dos funciones hash sobre cadenas muy diferentes entre sí: *murmur hashing* y *fnv1 hashing*. Las probabilidades de que, para una cadena dada, ambas produzcan el mismo resultado son ínfimas.
+
+Luego, para cada uno de los *k* bits que tenemos que almacenar, recuperamos la función hash correspondiente en nuestro conjunto. Para cada posición *i* entre 0 y *k* -1 hemos generado (en la inicialización) una función de doble hasheo *hₖ*. El *i*-ésimo bit será, por lo tanto, devuelto por `hᵢ(hM, hF)`, donde **hM** es el resultado de aplicar *murmur hashing* a la clave de entrada y **hF** el resultado de aplicar *fnv1 hashing*.
+
+Aunque el mayor nivel de aleatoriedad se obtendría con una semilla aleatoria para cada ejecución, necesitamos forzar un comportamiento determinista tanto para las pruebas como para recrear un bloom filter que pueda interpretar un buffer dado (por ejemplo, tras serializarlo o reiniciar tras una falla). Por lo tanto, también deberíamos dejar la opción de pasar la semilla al constructor del bloom filter.
+
+```
+//Método key2Positions
+function key2Positions(hashFunctions, seed, key)
+  hM ← murmurHash32(key, seed)
+  hF ← fnv1Hash32(key)
+  return hashFunctions.map(h => h(hM, hF))
+```
+
+- El método **key2Positions** toma un arreglo de funciones hash como entrada, junto con una semilla para inicializar estas funciones y la clave que se va a hashear. Devuelve el conjunto de índices de bits que se actualizarán en el bloom filter para leer/escribir la clave.  
+
+- Aplica murmur hashing a la clave, con la semilla dada.  
+- Aplica fnv1 hashing a la clave.  
+- Usa programación funcional: crea una lambda que aplica cada función `h` del arreglo `hashFunctions` a los dos valores `hM` y `hF`, devolviendo así un arreglo de enteros.
+
+##### Generando funciones hash
+
+En el listado anterior describimos cómo, en `key2Positions`, pasamos un arreglo de funciones hash y lo usamos para transformar una clave en una lista de índices: las posiciones en el arreglo de bits del filtro donde almacenamos la clave. Ahora veamos en el listado siguiente cómo inicializamos estas *k* funciones hash necesarias.
+
+El conjunto de funciones se creará utilizando **doble hashing** para combinar los dos argumentos de *k* formas diferentes. Comparado con hashing lineal o cuadrático, el doble hashing aumenta el número de posibles funciones de O(*k*) a O(*k*²). Aunque sigue lejos de O(*k*! ) de un hashing completamente uniforme, en la práctica basta para mantener baja la tasa de colisiones.
+
+```
+// Método initHashFunctions
+
+function initHashFunctions(numHashFunctions, numBits)
+  return range(0, numHashFunctions).map(i =>
+    (h1, h2) => (h1 + i * h2 + i * i) mod numBits
+  )
+```
+
+- El método **initHashFunctions** toma el número de funciones deseadas y el número de bits que contiene el bloom filter, y crea una lista de *numHashFunctions* funciones de doble hashing.  
+- Usamos programación funcional: mapeamos cada entero `i` de 0 a `numHashFunctions–1` a una lambda que, dados dos hashes `h1` y `h2`, devuelve `(h1 + i·h2 + i²) mod numBits`.
+
+
+#### 4.6.5 Constructor
+
+Pasemos ahora a la API pública, que reflejará la API para `set`. El constructor debe preparar todo el estado interno de un bloom filter, incluyendo la matemática para calcular el número de bits y de funciones hash necesarias para cumplir la precisión solicitada.
+
+```
+// Constructor del bloom filter
+
+function BloomFilter(maxSize, maxTolerance=0.01, seed=random())
+  this.size ← 0
+  this.maxSize ← maxSize
+  this.seed ← seed
+  this.numBits ← ceil(-maxSize * ln(maxTolerance) / ln(2) / ln(2))
+  if this.numBits > MAX_SIZE then
+    throw new Error("Overflow")
+  this.numHashFunctions ← ceil(-ln(maxTolerance) / ln(2))
+  numElements ← ceil(this.numBits / BITS_PER_INT)
+  this.bitsArray ← [0 ... 0]  // numElements enteros inicializados a 0
+  this.hashFunctions ← initHashFunctions(this.numHashFunctions, this.numBits)
+```
+
+- El argumento **maxTolerance** tiene un valor por defecto de 0.01; **seed** se inicializa por defecto a un entero aleatorio. No todos los lenguajes de programación proveen una sintaxis explícita para valores por defecto en las firmas de funciones, pero existen soluciones para aquellos que no lo hacen.  
+- Inicialmente, no se almacena ningún elemento en el filtro, por lo que el tamaño se inicializa a 0.  
+- Almacenamos en variables de clase los argumentos (locales) para el constructor.  
+- Calcula el número óptimo de bits necesarios:  m = -n*ln(p)/ ln(2)^2
+  donde **ceil(x)** es la función techo estándar que devuelve el entero más pequeño mayor o igual a *x*.  
+- Verifica que el tamaño quepa en memoria sin problemas.  
+- Lanza un error que puede ser manejado por el cliente.  
+- Calcula el número óptimo de funciones hash necesarias. Equivalentemente, puede escribirse como : k = m/n * ln(2).
+- Calcula el número de elementos para el búfer (entero) al dividir el número total de bits necesarios por el número de bits por entero, usando techo.  
+- Crea el búfer que almacenará los bits del filtro, todos inicializados a 0.  
+- Crea y almacena las funciones hash que se usarán para obtener los índices de bits para una clave.  
+
+Al crear el filtro, solo necesitamos proporcionar el número máximo de elementos que se espera que contenga. Si en algún momento se almacenan más de **maxSize** elementos, la buena noticia es que no se quedará sin espacio, pero la mala noticia es que ya no podremos garantizar la precisión esperada.
+
+Podemos pasar un segundo parámetro opcional para establecer la precisión deseada. Por defecto, el umbral para la probabilidad de un falso positivo (**maxTolerance**) es del 1%, pero podemos afinarlo pasando un valor menor (mejor precisión) o conformarnos con uno mayor (menos memoria) pasando un valor mayor.
+
+El último parámetro opcional (**seed**) permite forzar un comportamiento determinista para el filtro. Cuando el llamador omite este parámetro, se genera un valor aleatorio para la semilla.
+
+Después de validar los argumentos, establecemos los campos base y calculamos el tamaño del búfer, asegurándonos de que quepa en memoria. A continuación, calculamos el número óptimo de hashes para mantener baja la tasa de falsos positivos.
+
+
+##### Comprobando una clave
+
+Ahora podemos empezar a componer los métodos auxiliares para construir la API del bloom filter. Ten en cuenta que asumimos que las claves serán cadenas; si usas objetos serializables, necesitarás una función de serialización consistente que convierta objetos equivalentes en la misma cadena.
+
+> **Nota:** El procesamiento y preprocesamiento de datos a menudo son tan importantes, o más que los algoritmos mismos.
+
+Con las funciones auxiliares definidas, comprobar la existencia de una clave es muy sencillo: recuperamos las posiciones de los bits y verificamos que todos estén en 1. El pseudocódigo está en el listado siguiente:
+
+```
+// Método contains
+
+function contains(key, positions=null)
+  if positions == null then
+    positions ← key2Positions(this.hashFunctions, this.seed, key)
+  return positions.all(i => readBit(this.bitsArray, i) != 0)
+```
+
+- **contains** toma una clave y devuelve **true** solo si todos los bits correspondientes están en 1.  
+- Permite pasar el arreglo de posiciones precomputadas para ahorrar el cálculo doble.  
+- Usa **readBit** para comprobar cada posición; devuelve **false** si alguno es 0.
+
+Quizá notes que comprobamos `!= 0` en lugar de `== 1` para evitar desplazamientos adicionales y ahorrar unos milisegundos en cada operación.
+
+#### 4.6.7 Almacenando una clave
+
+Almacenar una clave es muy similar a comprobarla, solo que necesitamos un esfuerzo extra para llevar un control del número de elementos añadidos al filtro y usar `write` en lugar de `read`. Nótese que en esta implementación para `insert`, mostrada en el pseudocódigo siguiente, cuando calculamos el tamaño del filtro, llevamos la cuenta del número de elementos únicos añadidos al filtro, en lugar del número total de veces que se llama al método `add`.
+
+```
+function insert(key)
+  positions ← key2Positions(key)
+  if not contains(key, positions) then
+    this.size ← this.size + 1
+    positions.map(i => writeBit(this.bitsArray, i))
+```
+
+- La función `insert` toma una clave y la almacena en el filtro.  
+- Transforma la clave en una secuencia de *k* índices de bits con `key2Positions`.  
+- Antes de incrementar el tamaño y escribir en los bits, comprobamos que la clave no esté ya contenida en el filtro; así garantizamos contar solo elementos únicos. Nótese cómo pasamos el arreglo de posiciones a `contains` para evitar recalcularlo.  
+- Para cada índice, escribimos un `1` en el búfer usando `writeBit`.
+
+Esto se debe a que añadir la misma clave múltiples veces no afecta la precisión del filtro: siempre se cuenta como un único elemento.
+
+Sin embargo, hay un matiz: si una nueva clave única colisiona en todos sus índices con bits ya establecidos en `1`, se considera duplicada y no incrementa `size`. Esto tiene sentido, pues `contains(x)` ya habría devuelto un falso positivo de todas formas.
+
+En este listado también vemos por qué `contains` acepta un parámetro opcional de posiciones precomputadas: dentro de `insert` leemos y luego escribimos, y calcular los índices de bits puede ser costoso. Pasar el resultado a `contains` evita repetir ese cálculo. Para mantener limpia la API, esa sobrecarga debería restringirse a métodos internos (por ejemplo, usando sobrecarga o métodos privados).
+
+Otra alternativa para ahorrar el cálculo duplicado es modificar `writeBit` para que devuelva un booleano indicando si realmente cambió el bit; así, `insert` podría saber si al menos uno cambió y contar en consecuencia. Esa versión alternativa está disponible en el repositorio.
+
+En cualquier caso, contar con precisión las claves únicas tiene un coste; si no esperas muchas inserciones duplicadas, quizá no merezca la pena. Pero es necesario para estimar correctamente la probabilidad de falsos positivos.
+
+##### Estimando la exactitud
+
+La última tarea es proporcionar un método para estimar la probabilidad de un falso positivo basándonos en el estado actual del filtro: el número de elementos almacenados frente a su capacidad máxima. Veamos una implementación básica:
+
+```
+function falsePositiveProbability()
+  return pow(
+    1 - pow(E, this.numHashes * this.size / this.numBits),
+    this.numHashes
+  )
+```
