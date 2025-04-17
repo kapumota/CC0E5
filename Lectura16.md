@@ -211,3 +211,134 @@ El formato general de nuestra i-ésima función hash, para i entre 0 y `k-1`, se
 ```
 Hᵢ(key) = murmurhash(key) + i * fnv1(key) + i * i
 ```
+
+ ### Implementación
+
+
+Volviendo a nuestra aplicación de contactos: ¿cómo usaríamos un bloom filter para hacerla más rápida? Bueno, como se mencionó, necesitamos usarlo como un diccionario, así que vamos a crear un nuevo Bloom filter cuando inicie nuestra aplicación de correo electrónico, recuperar todos los contactos del servidor y agregarlos al Bloom filter. El listado siguiente resume este proceso de inicialización.
+
+```
+//Arranque de una aplicación de correo electrónico
+
+function initBloomFilter(server, minSize)
+  contactsList ← server.loadContacts()
+  size ← max(2 * |contactsList|, minSize)
+  bloomFilter ← new BloomFilter(size)
+  for contact in contactsList do
+    bloomFilter.insert(contact)
+  return bloomFilter
+```
+
+- El método `initBloomFilter` toma una interfaz a un servidor (un objeto fachada) y el tamaño mínimo que se debe usar para inicializar el Bloom filter; devuelve el Bloom filter recién creado.  
+- Al iniciar, carga opcionalmente la lista de contactos desde un servidor que se encarga del almacenamiento permanente.  
+- El tamaño del Bloom filter debe ser al menos el doble del tamaño actual de la lista de contactos, pero al menos igual a `minSize`, un valor mínimo que se puede pasar como argumento.  
+- Crea un Bloom filter vacío con el tamaño adecuado.  
+- Recorre la lista de contactos.  
+- Para cada contacto, lo añade al Bloom filter.
+
+Una vez configurada nuestra aplicación de directorio, tenemos dos operaciones en las que estamos principalmente interesados: comprobar si un contacto está en la lista y agregar un nuevo contacto al directorio.
+
+Para la primera operación, mostrada en el listado siguiente, podemos comprobar el bloom filter, y si dice que el contacto nunca ha sido agregado, entonces tenemos nuestra respuesta, el contacto no está en el sistema. Si, sin embargo, el bloom filter devuelve `true`, entonces podría tratarse de un falso positivo, por lo que necesitamos contactar al servidor para corroborarlo.
+
+```
+// Comprobando un correo electrónico
+
+function checkContact(bloomFilter, server, contact)
+  if bloomFilter.contains(contact) then
+    return server.contains(contact)
+  else
+    return false
+```
+
+- El método `checkContact` verifica si un contacto de correo electrónico está almacenado en la aplicación. Toma un bloom filter, una fachada de servidor y el contacto a comprobar. Devuelve `true` si el contacto ya está en nuestra libreta de contactos.  
+- Comprueba el Bloom filter para el contacto pasado al método.  
+- Si el Bloom filter devolvió `true`, necesitamos verificar si el servidor realmente almacena el contacto, ya que podría tratarse de un falso positivo.  
+- De lo contrario, dado que los bloom filters no tienen falsos negativos (sino solo falsos positivos), podemos devolver `false`.
+
+Para agregar nuevos contactos, siempre debemos sincronizarnos con nuestro almacenamiento permanente, como se muestra a continuación. Dado que esto probablemente implica una conexión remota a través de una red, existe una probabilidad no negligente de que la llamada al servidor falle; por lo tanto, necesitamos manejar las posibles fallas y asegurarnos de que la llamada remota tenga éxito antes de actualizar también el bloom filter.
+
+```
+// Agregando un nuevo contacto
+
+function addContact(bloomFilter, server, contact)
+  if server.storeContact(contact) then
+    bloomFilter.insert(contact)
+    return true
+  else
+    return false
+```
+
+- El método `addContact` añade un nuevo contacto al sistema; toma un bloom filter, un objeto servidor y el nuevo contacto a agregar. Devuelve `true` si y solo si la operación tiene éxito.  
+- Intenta agregar el contacto al servidor, y si tiene éxito entonces lo añade también al bloom filter y devuelve `true`.  
+- De lo contrario, la inserción falló, por lo que se devuelve `false`.
+
+#### Lectura y escritura de bits
+
+Ahora, pasemos a la implementación de un bloom filter, comenzando, como de costumbre, con los métodos auxiliares que nos darán los bloques básicos para construir la implementación de nuestra API.
+
+En particular, necesitamos:
+
+- Alguna forma de leer y escribir bits en cualquier ubicación del buffer de nuestro filtro.  
+- Un mapeo entre una clave de entrada y los índices de los bits en el buffer.  
+- Un conjunto de funciones hash generadas de forma determinista que se usarán para transformar claves en una lista de índices.
+
+Si estamos usando bloom filters para ahorrar memoria, no tendría sentido almacenar bits de forma ineficiente. Necesitaremos empaquetar bits en el tipo entero más pequeño disponible en el lenguaje de programación que elijamos; por lo tanto, tanto leer como escribir un bit nos obliga a mapear el índice del bit a un par de coordenadas: el elemento del arreglo que contiene el bit y el desplazamiento del bit dentro de ese elemento.
+
+El pseudocódigo muestra cómo calcular esas coordenadas.
+
+```
+// Calcular coordenas
+function findBitCoordinates(index)
+  byteIndex ← floor(index / BITS_PER_INT)
+  bitOffset ← index mod BITS_PER_INT
+  return (byteIndex, bitOffset)
+```
+
+- La función `findBitCoordinates` es un método utilitario que, dada la posición de un bit en un arreglo de bits, devuelve el índice del arreglo y el desplazamiento del bit con respecto al elemento del arreglo en ese índice.  
+- Dado el índice del bit a recuperar, extraemos el índice del byte; es decir, qué elemento del buffer del arreglo contiene el bit a extraer. `BITS_PER_INT` es una constante (del sistema) cuyo valor es el número de bits usados para almacenar un `int` en el lenguaje de programación utilizado (para la mayoría de los lenguajes es 32).  
+- Extrae el desplazamiento del bit dentro del byte del buffer mediante una operación módulo.  
+- Devuelve el índice del byte y el desplazamiento del bit como un par de valores.
+
+Una vez que tenemos esos dos índices, podemos leer o escribir cualquier bit fácilmente; se trata simplemente de un asunto de álgebra de bits. El listado muestra el método `readBit`.
+
+```
+// Método readBit
+
+function readBit(bitsArray, index)
+  (element, bit) ← findBitCoordinates(index)
+  return (bitsArray[element] & (1 << bit)) >> bit
+```
+
+- El método `readBit` extrae el bit en la posición `index` del arreglo de bits pasado como primer argumento. Devuelve el valor del bit, es decir, `0` o `1`.  
+- Recupera el índice del elemento y el desplazamiento para el bit en el arreglo de bits.  
+- Utiliza una máscara de un solo bit y operaciones AND y shift para extraer el valor del bit.
+
+El pseudocódigo muestra la contraparte de escritura, el método `writeBit`.
+
+```
+// Método writeBit
+
+function writeBit(bitsArray, index)
+  (element, bit) ← findBitCoordinates(index)
+  bitsArray[element] ← bitsArray[element] | (1 << bit)
+  return bitsArray
+```
+
+- El método `writeBit` toma el arreglo de bits y el índice del bit donde se debe escribir un `1`; devuelve el arreglo de bits después de modificarlo.  
+- Recupera el índice del elemento y el desplazamiento para el bit en el arreglo de bits.  
+- Realiza una operación OR con una máscara de un solo bit para establecer el bit en `1` (nunca se escriben ceros en esta versión).
+
+**Ejemplo de funcionamiento**  
+Supongamos que tenemos el buffer `B = [157, 25, 44, 204]` con `BITS_PER_INT = 8`.
+
+- Llamamos a `readBit(B, 19)`; entonces obtenemos `element == 2`, `bit == 3`.  
+  - `bitsArray[element]` evalúa a `44`.  
+  - `(1 << bit)` es `8`.  
+  - `44 & 8` es `8`, y al desplazarlo obtenemos `1`.  
+
+- Llamamos a `writeBit(B, 15)`; entonces obtenemos `element == 1`, `bit == 7`.  
+  - `bitsArray[element]` evalúa a `25`.  
+  - `(1 << bit)` es `128`.  
+  - `25 | 128` es `153`.  
+  - El buffer se actualiza a `B = [157, 153, 44, 204]`.
+ 
