@@ -168,7 +168,7 @@ En una tabla hash, esas mismas operaciones requieren primero extraer todas las c
 
 ### Bloom filter
 
-Los bloom filters es una estructura de datos nombrada en honor a Burton Howard Bloom, quien los inventó en la década de 1970. Existen cuatro diferencias notables entre las tablas hash y los bloom filters: 
+Los bloom filters (filtrados de Bloom) es una estructura de datos nombrada en honor a Burton Howard Bloom, quien los inventó en la década de 1970. Existen cuatro diferencias notables entre las tablas hash y los bloom filters: 
 
 - Los bloom filters básicos no almacenan datos; solo responden a la pregunta, ¿está un dato en el conjunto? En otras palabras, implementan la API de un hash set, no la API de una tabla hash.
 - Los bloom filters requieren menos memoria en comparación con las tablas hash; esta es la principal razón de su uso.
