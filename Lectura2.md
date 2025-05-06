@@ -4,7 +4,7 @@ Imagina que tienes la siguiente lectura:
 
 #### Empacando tu mochila
 
-Has sido seleccionado para poblar la primera colonia en Marte. Las tiendas de comestibles marcianas aún presentan escasez de productos —y encontrarlos es complicado—, por lo que eventualmente tendrás que cultivar tus propios alimentos. Mientras tanto, durante los primeros meses, te enviarán productos para sostenerte.
+Has sido seleccionado para poblar la primera colonia en Marte. Las tiendas de comestibles marcianas aún presentan escasez de productos y encontrarlos es complicado, por lo que eventualmente tendrás que cultivar tus propios alimentos. Mientras tanto, durante los primeros meses, te enviarán productos para sostenerte.
 
 #### Abstrayendo el problema
 
@@ -55,7 +55,7 @@ Reúnes a tu equipo de logística para una lluvia de ideas y, pronto, alguien su
 | Latas de tomate         | 300           | 237.000              | 790                 |
 
 Intentas empacar la caja seleccionando de arriba hacia abajo los productos con mayor relación calorías/kg, es decir, mantequilla de maní, arroz, harina de trigo y mermelada de fresa, para alcanzar un total de 2.813.800 calorías.  
-Aunque este resultado es significativamente mejor, observarás que incluir la mantequilla de maní impide agregar los frijoles, que en conjunto podrían aumentar aún más el valor total. La buena noticia es que, al menos, ya no tendrás que seguir la "dieta de *The Martian*" —esta vez, las papas no irán a Marte.
+Aunque este resultado es significativamente mejor, observarás que incluir la mantequilla de maní impide agregar los frijoles, que en conjunto podrían aumentar aún más el valor total. La buena noticia es que, al menos, ya no tendrás que seguir la "dieta de *The Martian*" esta vez, las papas no irán a Marte.
 
 Tras algunas horas más de análisis, se llega a la conclusión de que la única forma de garantizar la mejor solución es evaluar, para cada elemento, si al incluirlo o excluirlo se obtiene un resultado superior. Es decir, es necesario enumerar todas las posibles combinaciones, filtrar aquellas que excedan el límite de peso y elegir la mejor opción. Este método se conoce como **algoritmo de fuerza bruta**, y, como bien sabrás, resulta muy costoso desde el punto de vista matemático.
 
@@ -102,7 +102,7 @@ Desde el punto de vista computacional, hemos pasado por las siguientes etapas:
 
 El siguiente paso, aún más importante, fue pensar fuera de la caja para simplificar el problema eliminando algunas restricciones, lo que nos permitió encontrar un algoritmo más sencillo y una solución superior. Esta es, de hecho, otra regla de oro:
 
-> **"Siempre estudia tus requisitos en profundidad, cuestiona las restricciones y, cuando sea posible, elimínalas si ello te permite encontrar una solución igualmente valiosa —o incluso ligeramente inferior, pero a un costo mucho menor."**
+> **"Siempre estudia tus requisitos en profundidad, cuestiona las restricciones y, cuando sea posible, elimínalas si ello te permite encontrar una solución igualmente valiosa o incluso ligeramente inferior, pero a un costo mucho menor."**
 
 Por supuesto, en este proceso existen otras consideraciones (como leyes y seguridad) que deben respetarse, por lo que algunas restricciones no pueden ser eliminadas.  
 En la descripción de algoritmos, tras este análisis, lo siguiente sería detallar la solución y ofrecer pautas de implementación. No lo haremos aquí, ya que el algoritmo de programación dinámica para la mochila 0-1 está ampliamente documentado en la literatura y nuestro objetivo era ilustrar:
@@ -110,7 +110,6 @@ En la descripción de algoritmos, tras este análisis, lo siguiente sería detal
 - La importancia de evitar elecciones subóptimas en los algoritmos y estructuras de datos.
 - El proceso que seguiremos en futuras clases para presentar problemas y sus posibles soluciones.
 
----
 ### Preguntas 
 
 A partir del análisis anterior y teniendo en cuenta el siguiente fragmento:
