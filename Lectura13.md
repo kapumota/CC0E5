@@ -35,7 +35,7 @@ La implementación de estas estructuras concurrentes requiere, en ocasiones, la 
 
 #### División y conquista en entornos multinúcleo
 
-La estructura de los treaps permite una división natural del árbol en subárboles independientes, lo que es una característica valiosa para técnicas de paralelización basadas en el paradigma “divide y vencerás”. Al poder segmentar las operaciones en partes que pueden ejecutarse de forma paralela, se facilita el aprovechamiento de sistemas multinúcleo para acelerar tanto la búsqueda como ciertos tipos de operaciones de reequilibrado.
+La estructura de los treaps permite una división natural del árbol en subárboles independientes, lo que es una característica valiosa para técnicas de paralelización basadas en el paradigma "divide y vencerás". Al poder segmentar las operaciones en partes que pueden ejecutarse de forma paralela, se facilita el aprovechamiento de sistemas multinúcleo para acelerar tanto la búsqueda como ciertos tipos de operaciones de reequilibrado.
 
 En aplicaciones paralelas, una tarea común es dividir el árbol en porciones que pueden ser procesadas de manera simultánea. Por ejemplo, en aplicaciones que requieren el cálculo de estadísticas agregadas o la realización de búsquedas distribuidas, se pueden asignar subárboles a diferentes hilos de ejecución. De esta forma, cada núcleo del procesador opera sobre una parte del árbol sin interferir con los demás, lo que se traduce en una mejora sustancial del rendimiento global en comparación con la ejecución secuencial.
 
