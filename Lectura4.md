@@ -74,30 +74,30 @@ Como nota adicional, esto nos recuerda lo importante que es definir correctament
 Cada estructura de datos se puede descomponer en algunos componentes de nivel inferior:
 
 - **API** — La API es el contrato que una estructura de datos (ED) establece con los clientes externos. Incluye definiciones de métodos, así como algunas garantías sobre el comportamiento de los métodos que se proporcionan en la especificación de la ED. Por ejemplo, una cola de prioridad (PQ) proporciona estos métodos y garantías:
-  - `top()` — Devuelve y extrae el elemento con la mayor prioridad.
-  - `peek()` — Al igual que `top()`, devuelve el elemento con la mayor prioridad, pero sin extraerlo de la cola.
-  - `insert(e, p)` — Agrega un nuevo elemento `e` con prioridad `p` a la PQ.
-  - `remove(e)` — Elimina el elemento `e` de la cola.
-  - `update(e, p)` — Cambia la prioridad del elemento `e` y la establece en `p`.
+  - `top()` - Devuelve y extrae el elemento con la mayor prioridad.
+  - `peek()` - Al igual que `top()`, devuelve el elemento con la mayor prioridad, pero sin extraerlo de la cola.
+  - `insert(e, p)` - Agrega un nuevo elemento `e` con prioridad `p` a la PQ.
+  - `remove(e)` - Elimina el elemento `e` de la cola.
+  - `update(e, p)` - Cambia la prioridad del elemento `e` y la establece en `p`.
 
-- **Invariantes** — (Opcional) Propiedades internas que se mantienen verdaderas a lo largo de la vida de la estructura de datos. Por ejemplo, una lista ordenada tendría la invariante de que cada elemento no es mayor que su sucesor. El propósito de las invariantes es asegurarse de que se cumplan siempre las condiciones necesarias para respetar el contrato con los clientes externos. Son las contrapartes internas de las garantías en la API.
+- **Invariantes** - (Opcional) Propiedades internas que se mantienen verdaderas a lo largo de la vida de la estructura de datos. Por ejemplo, una lista ordenada tendría la invariante de que cada elemento no es mayor que su sucesor. El propósito de las invariantes es asegurarse de que se cumplan siempre las condiciones necesarias para respetar el contrato con los clientes externos. Son las contrapartes internas de las garantías en la API.
 
-- **Modelo de datos** — Donde se alojan los datos. Esto puede ser un bloque de memoria sin procesar, una lista, un árbol, etc.
+- **Modelo de datos** - Donde se alojan los datos. Esto puede ser un bloque de memoria sin procesar, una lista, un árbol, etc.
 
-- **Algoritmos** — La lógica interna que se utiliza para actualizar la estructura de datos asegurándose de que no se violen las invariantes.
+- **Algoritmos** - La lógica interna que se utiliza para actualizar la estructura de datos asegurándose de que no se violen las invariantes.
 
 ##### API y contrato para la cola de prioridad
 
 **Estructura de datos abstracta:** Cola de prioridad
 
-```java
+```
 class PriorityQueue {
-    top() → elemento
-    peek() → elemento
+    top() -> elemento
+    peek() -> elemento
     insert(elemento, prioridad)
     remove(elemento)
     update(elemento, nuevaPrioridad)
-    size() → int
+    size() -> int
 }
 ```
 
@@ -158,7 +158,7 @@ Pero eso no es todo: incluso podemos definir contenedores básicos como bolsas o
 
 Pasemos ahora de las estructuras de datos abstractas a las concretas. Conocer cómo funciona la API de una cola de prioridad es suficiente para utilizarla, pero a menudo no es suficiente para usarla de manera óptima. Especialmente en componentes críticos en tiempo o en aplicaciones intensivas en datos, es necesario comprender los detalles internos de las estructuras de datos y de su implementación para asegurarnos de poder integrarla en nuestra solución sin introducir un cuello de botella.
 
-Toda abstracción debe implementarse utilizando una estructura de datos concreta. Por ejemplo, una pila se puede implementar usando una lista, un arreglo o, en teoría, incluso un heap. La elección de la estructura de datos subyacente influirá únicamente en el rendimiento del contenedor. Escoger la mejor implementación suele ser un compromiso: algunas estructuras de datos aceleran ciertas operaciones, pero harán que otras sean más lentas.
+Toda abstracción debe implementarse utilizando una estructura de datos concreta. Por ejemplo, una pila se puede implementar usando una lista, un arreglo o en teoría, incluso un heap. La elección de la estructura de datos subyacente influirá únicamente en el rendimiento del contenedor. Escoger la mejor implementación suele ser un compromiso: algunas estructuras de datos aceleran ciertas operaciones, pero harán que otras sean más lentas.
 
 #### Comparando el rendimiento
 
