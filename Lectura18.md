@@ -64,16 +64,16 @@ class DisjointSet:
     partitionsMap: HashMap<Elemento, Set<Elemento>>
 
     function __init__(initialSet):  
-        partitionsMap ← nuevo HashMap  
+        partitionsMap <- nuevo HashMap  
         for elem in initialSet:  
             lanzarErrorSi(elem == null o existe(elem))  
-            partitionsMap[elem] ← nuevo Set{elem}
+            partitionsMap[elem] <- nuevo Set{elem}
 
     function add(elem):  
         lanzarErrorSi(elem == null)  
         if existe(elem):  
             return false  
-        partitionsMap[elem] ← nuevo Set{elem}  
+        partitionsMap[elem] <- nuevo Set{elem}  
         return true
 
     function findPartition(elem):  
@@ -81,18 +81,18 @@ class DisjointSet:
         return partitionsMap[elem]
 
     function areDisjoint(elem1, elem2):  
-        p1 ← findPartition(elem1)  
-        p2 ← findPartition(elem2)  
+        p1 <- findPartition(elem1)  
+        p2 <- findPartition(elem2)  
         return p1 != p2
 
     function merge(elem1, elem2):  
-        p1 ← findPartition(elem1)  
-        p2 ← findPartition(elem2)  
+        p1 <- findPartition(elem1)  
+        p2 <- findPartition(elem2)  
         if p1 == p2: return false  
         // siempre verter p1 en p2  
         for e in p1:  
             p2.add(e)  
-            partitionsMap[e] ← p2  
+            partitionsMap[e] <- p2  
         return true  
 ```  
 
