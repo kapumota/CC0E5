@@ -44,23 +44,23 @@ El proceso de inserción se divide en dos pasos:
 
 ```
 function insert(treap, key, priority) 
-    node ← treap.root 
-    parent ← null 
-    newNode ← new Node(key, priority) 
+    node <- treap.root 
+    parent <- null 
+    newNode <- new Node(key, priority) 
     while node != null do 
-        parent ← node 
+        parent <- node 
         if node.key <= key then  
-            node ← node.left  
+            node <- node.left  
         else 
-            node ← node.right 
+            node <- node.right 
     if parent == null then 
-        treap.root ← newNode  
+        treap.root <- newNode  
         return 
     elsif key <= parent.key then 
-        parent.left ← newNode  
+        parent.left <- newNode  
     else 
-        parent.right ← newNode  
-    newNode.parent ← parent 
+        parent.right <- newNode  
+    newNode.parent <- parent 
     while newNode.parent != null 
           and newNode.priority < newNode.parent.priority do 
         if newNode == newNode.parent.left then 
@@ -68,7 +68,7 @@ function insert(treap, key, priority)
         else 
             leftRotate(newNode) 
     if newNode.parent == null then  
-        treap.root ← newNode 
+        treap.root <- newNode 
 ```
 
 #### Explicación:
@@ -104,11 +104,11 @@ El procedimiento consiste en asignar la prioridad más baja posible al nodo a el
 
 ```
 function remove(treap, key) 
-     node ← search(treap.root, key) 
+     node <- search(treap.root, key) 
      if node == null then 
          return false 
      if isRoot(node) and isLeaf(node) then  
-         treap.root ← null 
+         treap.root <- null 
          return true 
      while not isLeaf(node) do 
          if node.left != null 
@@ -118,11 +118,11 @@ function remove(treap, key)
          else 
              rotateLeft(node.right)  
      if isRoot(node.parent) then 
-         treap.root ← node.parent 
+         treap.root <- node.parent 
      if node.parent.left == node then 
-         node.parent.left ← null 
+         node.parent.left <- null 
      else 
-         node.parent.right ← null 
+         node.parent.right <- null 
      return true 
 ```
 
@@ -159,7 +159,7 @@ El método `top` combina la obtención de la clave de la raíz y su eliminación
 ```
 function top(treap)  
      throw-if treap.root == null  
-     key ← treap.root.key 
+     key <- treap.root.key 
      remove(treap, key) 
      return key 
 ```
@@ -186,9 +186,9 @@ Las operaciones `min` y `max` retornan, respectivamente, la clave mínima y máx
 ```
 function min(treap)  
    throw-if treap.root == null 
-   node ← treap.root 
+   node <- treap.root 
    while node.left != null do 
-       node ← node.left  
+       node <- node.left  
    return node.key 
 ```
 
