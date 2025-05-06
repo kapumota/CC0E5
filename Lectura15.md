@@ -46,8 +46,8 @@ Los diccionarios generalizan este concepto, permitiendo que las claves provengan
 ```  
 class Dictionary {
   insert(key, value)
-  remove(key) → value
-  contains(key) → value
+  remove(key) -> value
+  contains(key) -> value
 }
 ```
 
@@ -119,7 +119,7 @@ También distinguimos entre **hash maps** y **hash sets**. El primero asocia un 
 class Set {  
   insert(key)  
   remove(key)  
-  contains(key) → true/false  
+  contains(key) -> true/false  
 }
 ```
 
@@ -222,9 +222,9 @@ El listado siguiente resume este proceso de inicialización.
 //Arranque de una aplicación de correo electrónico
 
 function initBloomFilter(server, minSize)
-  contactsList ← server.loadContacts()
-  size ← max(2 * |contactsList|, minSize)
-  bloomFilter ← new BloomFilter(size)
+  contactsList <- server.loadContacts()
+  size <- max(2 * |contactsList|, minSize)
+  bloomFilter <- new BloomFilter(size)
   for contact in contactsList do
     bloomFilter.insert(contact)
   return bloomFilter
@@ -290,8 +290,8 @@ El pseudocódigo muestra cómo calcular esas coordenadas.
 ```
 // Calcular coordenas
 function findBitCoordinates(index)
-  byteIndex ← floor(index / BITS_PER_INT)
-  bitOffset ← index mod BITS_PER_INT
+  byteIndex <- floor(index / BITS_PER_INT)
+  bitOffset <- index mod BITS_PER_INT
   return (byteIndex, bitOffset)
 ```
 
@@ -306,7 +306,7 @@ Una vez que tenemos esos dos índices, podemos leer o escribir cualquier bit fá
 // Método readBit
 
 function readBit(bitsArray, index)
-  (element, bit) ← findBitCoordinates(index)
+  (element, bit) <- findBitCoordinates(index)
   return (bitsArray[element] & (1 << bit)) >> bit
 ```
 
@@ -320,8 +320,8 @@ El pseudocódigo muestra la contraparte de escritura, el método `writeBit`.
 // Método writeBit
 
 function writeBit(bitsArray, index)
-  (element, bit) ← findBitCoordinates(index)
-  bitsArray[element] ← bitsArray[element] | (1 << bit)
+  (element, bit) <- findBitCoordinates(index)
+  bitsArray[element] <- bitsArray[element] | (1 << bit)
   return bitsArray
 ```
 
@@ -358,8 +358,8 @@ Aunque el mayor nivel de aleatoriedad se obtendría con una semilla aleatoria pa
 ```
 //Método key2Positions
 function key2Positions(hashFunctions, seed, key)
-  hM ← murmurHash32(key, seed)
-  hF ← fnv1Hash32(key)
+  hM <- murmurHash32(key, seed)
+  hF <- fnv1Hash32(key)
   return hashFunctions.map(h => h(hM, hF))
 ```
 
@@ -396,16 +396,16 @@ Pasemos ahora a la API pública, que reflejará la API para `set`. El constructo
 // Constructor del bloom filter
 
 function BloomFilter(maxSize, maxTolerance=0.01, seed=random())
-  this.size ← 0
-  this.maxSize ← maxSize
-  this.seed ← seed
-  this.numBits ← ceil(-maxSize * ln(maxTolerance) / ln(2) / ln(2))
+  this.size <- 0
+  this.maxSize <- maxSize
+  this.seed <- seed
+  this.numBits <- ceil(-maxSize * ln(maxTolerance) / ln(2) / ln(2))
   if this.numBits > MAX_SIZE then
     throw new Error("Overflow")
-  this.numHashFunctions ← ceil(-ln(maxTolerance) / ln(2))
-  numElements ← ceil(this.numBits / BITS_PER_INT)
-  this.bitsArray ← [0 ... 0]  // numElements enteros inicializados a 0
-  this.hashFunctions ← initHashFunctions(this.numHashFunctions, this.numBits)
+  this.numHashFunctions <- ceil(-ln(maxTolerance) / ln(2))
+  numElements <- ceil(this.numBits / BITS_PER_INT)
+  this.bitsArray <- [0 ... 0]  // numElements enteros inicializados a 0
+  this.hashFunctions <- initHashFunctions(this.numHashFunctions, this.numBits)
 ```
 
 - El argumento **maxTolerance** tiene un valor por defecto de 0.01; **seed** se inicializa por defecto a un entero aleatorio. No todos los lenguajes de programación proveen una sintaxis explícita para valores por defecto en las firmas de funciones, pero existen soluciones para aquellos que no lo hacen.  
@@ -442,7 +442,7 @@ Con las funciones auxiliares definidas, comprobar la existencia de una clave es 
 
 function contains(key, positions=null)
   if positions == null then
-    positions ← key2Positions(this.hashFunctions, this.seed, key)
+    positions <- key2Positions(this.hashFunctions, this.seed, key)
   return positions.all(i => readBit(this.bitsArray, i) != 0)
 ```
 
@@ -458,9 +458,9 @@ Almacenar una clave es muy similar a comprobarla, solo que necesitamos un esfuer
 
 ```
 function insert(key)
-  positions ← key2Positions(key)
+  positions <- key2Positions(key)
   if not contains(key, positions) then
-    this.size ← this.size + 1
+    this.size <- this.size + 1
     positions.map(i => writeBit(this.bitsArray, i))
 ```
 
