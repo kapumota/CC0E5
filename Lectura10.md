@@ -51,8 +51,8 @@ Se define una estructura de datos abstracta (ADT) que fusiona las propiedades de
 
 ```
 class SortedPriorityQueue { 
-    top() → element 
-    peek() → element 
+    top() -> element 
+    peek() -> element 
     insert(element, priority) 
     remove(element) 
     update(element, newPriority) 
