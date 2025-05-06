@@ -2,7 +2,7 @@
 
 El manejo eficiente de un heap requiere el uso de operaciones auxiliares que garanticen el mantenimiento de las propiedades estructurales y de prioridad definidas para la estructura. Entre estas operaciones se destacan dos métodos básicos: uno que mueve un elemento hacia arriba (bubbleUp, tratado en otra sección) y otro que lo desplaza hacia abajo (pushDown). 
 
-Además, se cuenta con operaciones que permiten la inserción de nuevos elementos, la extracción del elemento superior y la actualización de la prioridad de un elemento existente. A continuación se presentan en detalle las operaciones pushDown, insert, top y update.
+Además, se cuenta con operaciones que permiten la inserción de nuevos elementos, la extracción del elemento superior y la actualización de la prioridad de un elemento existente. A continuación se presentan en detalle las operaciones **pushDown**, **insert**, **top** y **update**.
 
 #### Operación pushDown
 
@@ -14,12 +14,12 @@ Esto ocurre, por ejemplo, cuando se extrae la raíz del heap y se reemplaza con 
 
 ```pseudo
 function pushDown(pairs, index=0)
-  currentIndex ← index
+  currentIndex <- index
   while currentIndex < firstLeafIndex(pairs) do
-    (child, childIndex) ← highestPriorityChild(currentIndex)
+    (child, childIndex) <- highestPriorityChild(currentIndex)
     if child.priority > pairs[currentIndex].priority then
       swap(pairs, currentIndex, childIndex)
-      currentIndex ← childIndex
+      currentIndex <- childIndex
     else
       break
 ```
@@ -38,15 +38,15 @@ Esta versión evita intercambios innecesarios. En lugar de realizar un intercamb
 
 ```pseudo
 function pushDown(pairs, index=0)
-  current ← pairs[index]
+  current <- pairs[index]
   while index < firstLeafIndex(pairs) do
-    (child, childIndex) ← highestPriorityChild(index)
+    (child, childIndex) <- highestPriorityChild(index)
     if child.priority > current.priority then
-      pairs[index] ← pairs[childIndex]
-      index ← childIndex
+      pairs[index] <- pairs[childIndex]
+      index <- childIndex
     else
       break
-  pairs[index] ← current
+  pairs[index] <- current
 ```
 
 En esta versión, se almacena en `current` el elemento a reubicar. Durante la iteración, si se detecta que un hijo tiene mayor prioridad que `current`, se mueve ese hijo hacia la posición actual y se actualiza el índice. Cuando ya no se cumple la condición, se coloca `current` en su posición definitiva, evitando múltiples intercambios y reduciendo el número de asignaciones.
@@ -59,9 +59,9 @@ La operación de inserción permite agregar un nuevo elemento al heap, mantenien
 
 ```pseudo
 function insert(element, priority)
-  p ← Pair(element, priority)
+  p <- Pair(element, priority)
   pairs.append(p)
-  bubbleUp(pairs, |pairs| – 1)
+  bubbleUp(pairs, |pairs| - 1)
 ```
 
 **Explicación del proceso**
@@ -81,12 +81,12 @@ El método **top** extrae el elemento superior del heap, es decir, el de mayor (
 ```pseudo
 function top()
   if pairs.isEmpty() then error()
-  p ← pairs.removeLast()
+  p <- pairs.removeLast()
   if pairs.isEmpty() then
     return p.element
   else  
-    (element, priority) ← pairs[0]
-    pairs[0] ← p
+    (element, priority) <- pairs[0]
+    pairs[0] <- p
     pushDown(pairs, 0)
     return element
 ```
@@ -100,7 +100,7 @@ function top()
 - Se llama a **pushDown** para reubicar el nuevo elemento en la raíz, asegurando que se mantenga la invariante del heap.  
 - Finalmente, se retorna el elemento original de la raíz.
 
-Debido a que tanto la eliminación del último elemento como la operación pushDown son logarítmicas, la complejidad total de top() es ` O(\log_D(n)) ` en el peor de los casos.
+Debido a que tanto la eliminación del último elemento como la operación pushDown son logarítmicas, la complejidad total de top() es ` O(log_D(n)) ` en el peor de los casos.
 
 #### Operación update (actualización de prioridad)
 
@@ -110,10 +110,10 @@ El método **update** permite modificar la prioridad de un elemento ya existente
 
 ```pseudo
 function update(oldValue, newPriority)
-  index ← pairs.find(oldValue)
+  index <- pairs.find(oldValue)
   if index ≥ 0 then
-    oldPriority ← pairs[index].priority
-    pairs[index] ← Pair(oldValue, newPriority)
+    oldPriority <- pairs[index].priority
+    pairs[index] <- Pair(oldValue, newPriority)
     if (newPriority < oldPriority) then
       bubbleUp(pairs, index)
     elsif (newPriority > oldPriority) then        
@@ -168,7 +168,7 @@ Si se ejecutan en el orden incorrecto, podría generarse un heap inconsistente, 
 
 La inicialización de un heap puede realizarse de dos formas:
 
-1. **Inserción secuencial:**  Crear un heap vacío y añadir los elementos uno por uno, lo que tiene una complejidad de O(n log n).
+1. **Inserción secuencial:**  Crear un heap vacío y añadir los elementos uno por uno, lo que tiene una complejidad de `O(nlog n)`.
 
 2. **Heapify directo:**  Inicializar el heap con el conjunto completo de n elementos en cualquier orden y luego reorganizar el arreglo para cumplir las propiedades del heap.
 
@@ -184,7 +184,7 @@ function heapify(pairs)
     pushDown(pairs, index)
 ```
 
-- **D:** Factor de ramificación (por ejemplo, D = 2 para un heap binario).  
+- **D:** Factor de ramificación (por ejemplo, `D = 2` para un heap binario).  
 - **pushDown:** Se encarga de asegurar que el subheap con raíz en el índice dado sea un heap válido.
 
 **Análisis del tiempo de ejecución**
@@ -209,7 +209,7 @@ En aplicaciones donde es fundamental modificar la prioridad de un elemento de ma
 
 ```pseudo
 function contains(elem)
-  index ← elementToIndex[elem]
+  index <- elementToIndex[elem]
   return index >= 0
 ```
 
