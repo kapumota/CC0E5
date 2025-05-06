@@ -4,13 +4,13 @@ Los algoritmos y las estructuras de datos representan el núcleo teórico y prá
 
 Un científico informático, desarrollador de software o ingeniero de datos debe dominar estos conceptos, ya que la selección adecuada de algoritmos y estructuras influye directamente en el rendimiento, seguridad y eficiencia del software. El uso de un algoritmo óptimo puede acelerar una aplicación drásticamente, mientras que una mala elección puede dejar vulnerabilidades, como se ha visto en ataques DoS basados en colisiones de hash o en sistemas de generación de números aleatorios defectuosos.
 
----
+
 
 ### 2. Fundamentos de algoritmos y estructuras de datos
 
 #### 2.1 Definición y evolución histórica
 
-Los **algoritmos** son conjuntos finitos de instrucciones que transforman una entrada en una salida deseada. Se definen en términos de entradas, procesos y salidas, y pueden ser descritos mediante pseudocódigo o lenguajes de programación reales. Por otro lado, las **estructuras de datos** son métodos concretos para organizar y almacenar datos, permitiendo su eficiente manipulación. La distinción clave entre ambos conceptos se puede ilustrar mediante la siguiente analogía: las estructuras de datos son los “sustantivos” (la organización de la información) y los algoritmos son los “verbos” (las acciones o transformaciones que se realizan sobre la información).
+Los **algoritmos** son conjuntos finitos de instrucciones que transforman una entrada en una salida deseada. Se definen en términos de entradas, procesos y salidas, y pueden ser descritos mediante pseudocódigo o lenguajes de programación reales. Por otro lado, las **estructuras de datos** son métodos concretos para organizar y almacenar datos, permitiendo su eficiente manipulación. La distinción clave entre ambos conceptos se puede ilustrar mediante la siguiente analogía: las estructuras de datos son los "sustantivos" (la organización de la información) y los algoritmos son los "verbos" (las acciones o transformaciones que se realizan sobre la información).
 
 Históricamente, las ideas detrás de algoritmos se remontan a siglos atrás, con ejemplos como el algoritmo de Euclides para el cálculo del máximo común divisor y el cribado de Eratóstenes para la generación de números primos. Sin embargo, la integración sistemática de estos conceptos en la informática se consolidó a partir del desarrollo de computadoras electrónicas en el siglo XX, permitiendo avances en áreas tan variadas como la programación dinámica, la optimización y el análisis de grafos.
 
@@ -22,8 +22,6 @@ Por contraste, una **estructura de datos** es la implementación concreta de un 
 
 El análisis comparativo entre ADT y DS destaca que, mientras el ADT se centra en _qué_ operaciones se pueden realizar, la estructura de datos concreta responde al _cómo_ se llevan a cabo esas operaciones.
 
----
-
 ### 3. Algoritmos heurísticos, probabilísticos y aleatorios
 
 En muchos escenarios prácticos, no siempre es posible o deseable buscar una solución óptima determinista, y es aquí donde entran en juego algoritmos heurísticos, probabilísticos y aleatorios.
@@ -31,7 +29,7 @@ En muchos escenarios prácticos, no siempre es posible o deseable buscar una sol
 #### 3.1 Algoritmos heurísticos
 
 Los **algoritmos heurísticos** utilizan técnicas basadas en la experiencia o en reglas empíricas para encontrar soluciones aproximadas a problemas complejos. Aunque no garantizan la solución óptima, ofrecen respuestas suficientemente buenas en tiempos razonables. Ejemplos clásicos incluyen el recocido simulado (simulated annealing) y algoritmos genéticos.  
-- **Recocido simulado:** Inspirado en el proceso de enfriamiento en la metalurgia, este algoritmo permite “aceptar” soluciones peores de forma ocasional para escapar de óptimos locales y explorar el espacio de soluciones.  
+- **Recocido simulado:** Inspirado en el proceso de enfriamiento en la metalurgia, este algoritmo permite "aceptar" soluciones peores de forma ocasional para escapar de óptimos locales y explorar el espacio de soluciones.  
 - **Algoritmos genéticos:** Emulan procesos biológicos como la selección natural para evolucionar soluciones a lo largo de múltiples generaciones, combinando y mutando candidatos a solución.
 
 #### 3.2 Algoritmos probabilísticos y aleatorios
@@ -39,15 +37,14 @@ Los **algoritmos heurísticos** utilizan técnicas basadas en la experiencia o e
 Los **algoritmos probabilísticos** incorporan elementos de aleatorización en sus procesos de decisión, basándose en la probabilidad para tomar decisiones durante la ejecución. Esto puede mejorar el rendimiento en promedio o simplificar el diseño del algoritmo. Un ejemplo es el algoritmo de quicksort con selección aleatoria del pivote, que mejora la probabilidad de obtener un rendimiento cercano al óptimo.  
 Los **algoritmos aleatorios** son un subconjunto en el que se usan números aleatorios para influir en la trayectoria del algoritmo. En el balanceo de árboles de búsqueda, por ejemplo, se utilizan técnicas de aleatorización para evitar la degradación del rendimiento en casos adversos.
 
-Un caso de estudio interesante es el uso de aleatorización en la construcción de _treaps_. Un **treap** es una estructura que combina un árbol binario de búsqueda (BST) con un heap. Cada nodo tiene dos claves: una clave de búsqueda y una prioridad generada de forma aleatoria. La propiedad del BST se mantiene para la clave de búsqueda, y la propiedad del heap se mantiene para la prioridad. Esto garantiza un balanceo probabilístico del árbol, obteniendo un rendimiento promedio de operaciones de inserción, eliminación y búsqueda en tiempo O(log n).
+Un caso de estudio interesante es el uso de aleatorización en la construcción de _treaps_. Un **treap** es una estructura que combina un árbol binario de búsqueda (BST) con un heap. Cada nodo tiene dos claves: una clave de búsqueda y una prioridad generada de forma aleatoria. La propiedad del BST se mantiene para la clave de búsqueda, y la propiedad del heap se mantiene para la prioridad. Esto garantiza un balanceo probabilístico del árbol, obteniendo un rendimiento promedio de operaciones de inserción, eliminación y búsqueda en tiempo `O(log n)`.
 
----
 ### 4. Complejidad, correctitud y terminación en algoritmos
 
 #### 4.1 Análisis de complejidad en tiempo de ejecución
 
 El **análisis de complejidad** es fundamental para evaluar el rendimiento de un algoritmo. Se utiliza la notación Big-O para describir el comportamiento en el peor caso, así como la notación Theta y Omega para describir el rendimiento en el caso promedio o en el mejor caso.  
-Por ejemplo, en una búsqueda lineal en un array de n elementos, el peor caso requiere O(n) operaciones, mientras que una búsqueda binaria en un array ordenado realiza O(log n) comparaciones. Este análisis ayuda a justificar la elección de un algoritmo en función de las restricciones del problema y los recursos disponibles.
+Por ejemplo, en una búsqueda lineal en un array de n elementos, el peor caso requiere `O(n)` operaciones, mientras que una búsqueda binaria en un array ordenado realiza `O(log n)` comparaciones. Este análisis ayuda a justificar la elección de un algoritmo en función de las restricciones del problema y los recursos disponibles.
 
 #### 4.2 Correctitud y pruebas de algoritmos
 
@@ -63,7 +60,6 @@ Por ejemplo, al probar la correctitud del algoritmo de inserción en un heap, se
 
 La **terminación** de un algoritmo es la garantía de que, para cualquier entrada válida, el algoritmo finalizará en un tiempo finito. Una técnica común para demostrar la terminación es definir una función de medida que asigna a cada estado del algoritmo un número natural. Se demuestra que en cada iteración de ejecución, el valor de esta función disminuye de manera estricta, lo que, al ser un conjunto bien ordenado (los números naturales), garantiza que no se puede decrementar indefinidamente, forzando la terminación del algoritmo.
 
----
 
 ### 5. Ejemplos y aplicaciones
 
@@ -223,7 +219,6 @@ function union(x, y):
 
 Esta estructura permite, en promedio, realizar operaciones en casi tiempo constante (O(α(n)), donde α es la inversa de la función de Ackermann, que crece extremadamente lento).
 
----
 ### 6. Integración teórica y aplicaciones prácticas
 
 #### 6.1 De Problemas a soluciones: la importancia de la abstracción
@@ -424,7 +419,6 @@ Para demostrar la terminación de un algoritmo, se define una función de medida
 
 El análisis de la complejidad en tiempo se realiza evaluando el número de operaciones en función del tamaño de la entrada. Se utiliza la notación Big-O para caracterizar el comportamiento en el peor caso, pero también es posible analizar el comportamiento esperado o promedio, especialmente en algoritmos aleatorizados. En el caso de estructuras como los treaps, la aleatorización conduce a un tiempo de operación promedio de O(log n), lo que resulta altamente eficiente para grandes conjuntos de datos.
 
----
 
 ### 9. Relación intrínseca entre algoritmos y estructuras de datos
 
