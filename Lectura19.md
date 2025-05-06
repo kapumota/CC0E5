@@ -22,9 +22,9 @@ El pseudocódigo para la nueva versión de `findPartition` es:
 ```  
 function findPartition(elem):  
     throw-if (elem == null or not parentsMap.has(elem))  
-    parent ← parentsMap[elem]  
+    parent <- parentsMap[elem]  
     if parent != elem then  
-        parent ← findPartition(parent)  
+        parent <- findPartition(parent)  
     return parent  
 ```  
 
@@ -43,11 +43,11 @@ La versión árbol de `merge` aprovecha directamente la representación de `pare
 
 ```  
 function merge(elem1, elem2):  
-    p1 ← findPartition(elem1)  
-    p2 ← findPartition(elem2)  
+    p1 <- findPartition(elem1)  
+    p2 <- findPartition(elem2)  
     if p1 == p2 then  
         return false  
-    parentsMap[p2] ← p1  
+    parentsMap[p2] <- p1  
     return true  
 ```  
 
@@ -91,9 +91,9 @@ El pseudocódigo modificado de `findPartition` con compresión de caminos es:
 ```  
 function findPartition(elem):  
     throw-if (elem == null or not parentsMap.has(elem))  
-    info ← parentsMap[elem]           // ahora guardamos un objeto Info  
+    info <- parentsMap[elem]           // ahora guardamos un objeto Info  
     if info.root != elem then  
-        info.root ← findPartition(info.root)  
+        info.root <- findPartition(info.root)  
     return info.root  
 ```  
 
@@ -120,8 +120,8 @@ En el código, se encapsula esta información en una clase interna:
 class Info:  
     function Info(elem):  
         throw-if elem == null  
-        this.root ← elem     // cada nodo empieza siendo raíz de sí mismo  
-        this.rank ← 1        // rango inicial = 1  
+        this.root <- elem     // cada nodo empieza siendo raíz de sí mismo  
+        this.rank <- 1        // rango inicial = 1  
 ```  
 
 Y `parentsMap: HashMap<Elemento, Info>` asocia cada elemento con su objeto `Info`. Así:  
@@ -141,13 +141,13 @@ Y `parentsMap: HashMap<Elemento, Info>` asocia cada elemento con su objeto `Info
 
 ```  
 function merge(elem1, elem2):  
-    r1 ← findPartition(elem1)  
-    r2 ← findPartition(elem2)  
+    r1 <- findPartition(elem1)  
+    r2 <- findPartition(elem2)  
     if r1 == r2:  
         return false  
 
-    info1 ← parentsMap[r1]  
-    info2 ← parentsMap[r2]  
+    info1 <- parentsMap[r1]  
+    info2 <- parentsMap[r2]  
 
     // Unión por rango  
     if info1.rank < info2.rank:  
@@ -177,8 +177,7 @@ Con ambas heurísticas activas:
 - **`merge`**: amortizado `O(α(n))`.  
 - **`areDisjoint`**: dos búsquedas de raíz, `O(α(n))`.  
 
-Dado que `α(n)` para cualquier `n` típico es menor que `5`, podemos considerar estas operaciones **prácticamente constantes**. Esto hace posible emplear conjuntos disjuntos en aplicaciones críticas (motores de clustering, detección de ciclos en grafos, algoritmos de Kruskal para 
-árboles de expansión mínima, estructuras de conectividad dinámica, etc.) con garantías de rendimiento muy altas.  
+Dado que `α(n)` para cualquier `n` típico es menor que `5`, podemos considerar estas operaciones **prácticamente constantes**. Esto hace posible emplear conjuntos disjuntos en aplicaciones críticas (motores de clustering, detección de ciclos en grafos, algoritmos de Kruskal para árboles de expansión mínima, estructuras de conectividad dinámica, etc.) con garantías de rendimiento muy altas.  
 
 Además, la complejidad real del código adicional para mantener rangos y realizar compresión de caminos es mínima, ¿por qué?.
 
