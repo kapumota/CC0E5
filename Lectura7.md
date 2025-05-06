@@ -40,7 +40,7 @@ A continuación se presenta el pseudocódigo que ilustra esta estrategia:
 
 ```
 function topK(A, k)
-  heap ← DWayHeap()
+  heap <- DWayHeap()
   for el in A do
     if (heap.size == k and heap.peek() < el) then
       heap.top()
@@ -113,17 +113,17 @@ El siguiente pseudocódigo describe el proceso completo para construir el árbol
 
 ```
 function huffman(text)
-  charFrequenciesMap ← ComputeFrequencies(text)
-  priorityQueue ← MinHeap()
+  charFrequenciesMap <- ComputeFrequencies(text)
+  priorityQueue <- MinHeap()
   for (char, frequency) in charFrequenciesMap do
     priorityQueue.insert(TreeNode([char], frequency))
   while priorityQueue.size > 1 do
-    left ← priorityQueue.top()
-    right ← priorityQueue.top()
-    parent ← TreeNode(left.chars + right.chars,
+    left <- priorityQueue.top()
+    right <- priorityQueue.top()
+    parent <- TreeNode(left.chars + right.chars,
                        left.frequency + right.frequency)
-    parent.left ← left
-    parent.right ← right
+    parent.left <- left
+    parent.right <- right
     priorityQueue.insert(parent)
   return buildTable(priorityQueue.top(), [], Map())
 ```
@@ -143,7 +143,7 @@ El método *buildTable* se encarga de recorrer recursivamente el árbol de Huffm
 ```
 function buildTable(node, sequence, charactersToSequenceMap)
   if node.characters.size == 1 then
-    charactersToSequenceMap[node.characters[0]] ← sequence 
+    charactersToSequenceMap[node.characters[0]] <- sequence 
   else
     if node.left <> null then
       buildTable(node.left, 0 + sequence, charactersToSequenceMap) 
