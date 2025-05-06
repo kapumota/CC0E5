@@ -43,7 +43,7 @@ class DHeap:
 En este contexto, la notación para asignar y desestructurar las tuplas es importante. Si se tiene una variable `p` que representa una tupla, se puede extraer el elemento y su prioridad con la sintaxis:
 
 ```
-(element, priority) ← p
+(element, priority) <- p
 ```
 
 Además, se puede acceder a los campos de la tupla utilizando la notación `p.element` y `p.priority`.
@@ -112,10 +112,10 @@ El siguiente pseudocódigo describe una implementación básica del método **bu
 
 ```
 function bubbleUp(pairs, index=|pairs|-1)
-  parentIndex ← index
+  parentIndex <- index
   while parentIndex > 0 do
-    currentIndex ← parentIndex
-    parentIndex ← getParentIndex(parentIndex)
+    currentIndex <- parentIndex
+    parentIndex <- getParentIndex(parentIndex)
     if pairs[parentIndex].priority < pairs[currentIndex].priority then
       swap(pairs, currentIndex, parentIndex)
     else
@@ -146,15 +146,15 @@ El siguiente pseudocódigo muestra la versión optimizada del método **bubbleUp
 
 ```
 function bubbleUp(pairs, index=|pairs|-1)
-  current ← pairs[index]
+  current <- pairs[index]
   while index > 0 do
-    parentIndex ← getParentIndex(index)
+    parentIndex <- getParentIndex(index)
     if pairs[parentIndex].priority < current.priority then
-      pairs[index] ← pairs[parentIndex]
-      index ← parentIndex
+      pairs[index] <- pairs[parentIndex]
+      index <- parentIndex
     else
       break
-  pairs[index] ← current
+  pairs[index] <- current
 ```
 
 **Desglose del pseudocódigo optimizado:**
