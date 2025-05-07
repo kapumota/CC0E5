@@ -256,11 +256,330 @@ Por fortuna, al reconocer que los sufijos se superponen y comparten prefijos, po
 
 | Algoritmo       | Construcción de SA      | Construcción de LCP | Notas prácticas                        |
 | --------------- | ----------------------- | ------------------- | -------------------------------------- |
-| Naïvo           | O(n² log n)             | --                 | Inviable incluso para `n` ≈ 10⁵        |
+| Naive          | O(n² log n)             | --                 | Inviable incluso para `n` ≈ 10⁵        |
 | Prefix-doubling | O(n log n)              | O(n)                | Constantes moderadas, giras de memoria |
 | SA-IS           | O(n) (ó n log k)        | O(n)                | Línea base en alfabetos pequeños       |
 | DivSufSort      | O(n log n) (muy optim.) | O(n)                | Rápido en la práctica, caché‐friendly  |
 
 En la práctica, SA-IS domina cuando necesitamos garantías de tiempo lineal y alfabetos restringidos (por ejemplo, genomas con 4-20 caracteres), mientras que DivSufSort es el estándar de facto en herramientas de procesamiento de texto y compresión por su excelente rendimiento empírico incluso en alfabetos amplios y secuencias masivas.
 
+#### Tipos S y L en la construcción de arreglos de sufijos
+
+Para organizar los sufijos de forma eficiente en **SA-IS**, cada posición de la cadena `T` se etiqueta como **S-Type** o **L-Type**, aprovechando la relación lexicográfica entre sufijos adyacentes. A partir de esta clasificación, se detectan los sufijos más críticos (los **LMS**) y se induce el orden de los demás sin compararlos todos entre sí.
+
+#### 1. Definición de tipos
+
+* **S-Type**
+  Una posición `i` es S-Type si el sufijo que comienza en `i` es **menor** que el de `i+1`, es decir,
+
+  ```text
+  T[i..] < T[i+1..]  
+  ```
+
+  O bien, si `T[i] == T[i+1]` y `i+1` ya ha sido marcado como S-Type.
+
+* **L-Type**
+  Una posición `i` es L-Type si el sufijo en `i` es **mayor** que el de `i+1`, o si los caracteres coinciden y `i+1` es L-Type:
+
+  ```text
+  T[i..] > T[i+1..]  
+  ```
+
+Por convención, el último carácter (la sentinela `$`) se considera S-Type.
+
+#### 2. Detección de sufijos LMS
+
+Dentro de estos dos grupos aparece un subconjunto fundamental:
+
+> **LMS (Left-most S-Type)**:
+> Son las posiciones `i` que **son S-Type** y además **`i−1` es L-Type**.
+
+Estos sufijos LMS marcan el "punto de inflexión" entre regiones L y S, y sirven como pivotes para ordenar el resto:
+
+1. **Recopilar todos los sufijos LMS** en el orden que aparecen en `T`.
+2. **Ordenar sólo esos sufijos** (mediante un string reducido y posible recursión).
+3. **Inducir** luego la posición de los sufijos L (en un barrido ascendente) y de los sufijos S (en uno descendente), rellenando cada bucket de caracteres de forma estable.
+
+#### 3. Ejemplo de clasificación
+
+Para ilustrar, tomemos
+
+```text
+T = "banana$"
+```
+
+y construyamos un vector `type[0..6]`:
+
+|  i  | T\[i] | Comparación con T\[i+1] | type\[i] | Notas               |
+| :-: | :---: | :---------------------: | :------: | :------------------ |
+|  6  |   \$  |            —            |  S-Type  | sentinela siempre S |
+|  5  |   a   |    "a\$" < "\$" ? No    |  L-Type  | "a\$" > "\$"        |
+|  4  |   n   |      "na\$" > "a\$"     |  L-Type  |                     |
+|  3  |   a   |     "ana\$" < "na\$"    |  S-Type  |                     |
+|  2  |   n   |    "nana\$" > "ana\$"   |  L-Type  |                     |
+|  1  |   a   |    "ana\$" < "nana\$"   |  S-Type  |                     |
+|  0  |   b   |  "banana\$" > "anana\$" |  L-Type  |                     |
+
+De aquí surgen los sufijos **LMS** en las posiciones `1` y `3`, ya que son S-Type y su anterior (`0` y `2`, respectivamente) son L-Type.
+
+#### 4. Ventajas de la clasificación
+
+* **Reducción de comparaciones**: al ordenar primero los sufijos LMS (mucho menos numerosos) y luego "extender" ese orden, evitamos comparar sufijos completos entre sí.
+* **Inducción estable**: los barridos ascendente (L) y descendente (S) rellenan cada bucket respetando el orden parcial ya establecido, garantizando estabilidad y cohesión lexicográfica.
+* **Complejidad lineal**: gracias a que cada posición se etiqueta y se induce exactamente una vez, SA-IS alcanza **O(n)** (o **O(n log k)** en alfabetos generales), superando en muchos casos la construcción naive.
+
+Con esta organización, SA-IS convierte la superposición natural de sufijos en una ventaja algorítmica, logrando construir el **Suffix Array** sin ordenar todos los sufijos de forma explícita.
+
+#### Algoritmo SA-IS
+
+**SA-IS** (Suffix Array Induced Sorting), ideado por Nong, Zhang y Chan, construye el arreglo de sufijos en tiempo **O(n)** (o **O(n·log k)** si el alfabeto tiene k símbolos) sin comparar sufijos de forma directa. Su esquema se basa en clasificar posiciones y aprovechar recursión sobre un "string reducido":
+
+1. **Etiquetado de tipos**
+
+   * Recorremos la cadena `T` de derecha a izquierda, asignando a cada índice `i` un **tipo** (S o L) según la relación lexicográfica entre `T[i..]` y `T[i+1..]`.
+   * Simultáneamente, detectamos las posiciones **LMS** (S-Type cuyo anterior es L-Type), que actuarán como puntos de anclaje.
+
+2. **Construcción del string reducido**
+
+   * Tomamos cada bloque LMS (subcadena que va de un LMS hasta antes del siguiente LMS) y lo asignamos a un **símbolo único** en una nueva cadena `T'`.
+   * Si el número de bloques LMS distintos coincide con la cantidad de símbolos en `T'`, su orden lexicográfico queda resuelto directamente.
+   * En caso contrario, aplicamos **recursivamente** SA-IS sobre `T'`, reduciendo el problema a tamaño ≤ n/2.
+
+3. **Inducción de sufijos L (barrido ascendente)**
+
+   * Con la ordenación de bloques LMS ya conocida, colocamos en cada **bucket** de caracteres los sufijos `L` que preceden a cada LMS, recorriendo `SA` de izquierda a derecha.
+   * Cada inserción respeta el orden parcial heredado, llenando de forma estable los espacios libres en los buckets.
+
+4. **Inducción de sufijos S (barrido descendente)**
+
+   * Finalmente, recorremos `SA` de derecha a izquierda para insertar los sufijos `S` que siguen a cada LMS, usando el mismo criterio de buckets y manteniendo estabilidad.
+   * De este modo, todos los sufijos S-Type se sitúan en su posición correcta sin necesidad de compararlos.
+
+
+#### Claves del rendimiento lineal
+
+* **Reducción del problema**: al recursar sobre una versión acotada de `T` (el string reducido), la parte más costosa opera sobre un tamaño como máximo n/2.
+* **Buckets precomputados**: mantenemos para cada carácter su rango inicial y final en `SA`, lo que permite inserciones por simple incremento/decremento de índices.
+* **Sin comparaciones carácter a carácter**: todas las decisiones de posición se basan en tipos y en la recursión, no en comparar sufijos completos.
+* **Operaciones locales**: cada sufijo se "visita" y se coloca una sola vez en cada fase (tipado, ordenación LMS, inducción `L` y `S`), garantizando que el trabajo total sea proporcional a **n**.
+
+Gracias a esta combinación de clasificación, reducción recursiva e inducción estable, SA-IS ofrece una construcción de suffix array que aúna simplicidad conceptual y eficiencia práctica, convirtiéndose en la referencia para alfabetos de tamaño moderado o constante.
+
+
+#### Algoritmo DivSufSort
+
+**DivSufSort**, desarrollado por Yuta Mori, es uno de los métodos más rápidos y usados en la práctica para construir suffix arrays en texto de gran tamaño. Su diseño equilibra la rapidez teórica con un uso muy eficiente de la memoria caché y pocos pasos recursivos. A continuación, presentamos una versión refinada de su flujo de trabajo:
+
+1. **Conteo y delimitación de buckets**
+
+   * Recorremos `T` una vez para **contar** la frecuencia de cada carácter.
+   * Con esos conteos, establecemos los **límites** izquierdo y derecho de cada bucket en el arreglo `SA`, de modo que los sufijos que empiecen con el mismo símbolo se ubiquen en un mismo rango contiguo.
+
+2. **Clasificación inicial de sufijos "B\*"**
+
+   * Se identifican los sufijos de tipo **B\*** (análogos a los LMS en SA-IS): son sufijos que marcan una transición de un carácter grande a uno más pequeño.
+   * Sin recursión, colocamos estos sufijos B\* al final de sus buckets correspondientes (usando el límite derecho decreciente), obteniendo un orden parcial estable.
+
+3. **Ordenación recursiva de bloques B\***
+
+   * Cada sufijo B\* marca el inicio de un **bloque** de sufijos equivalentes en términos de prefijo.
+   * Asignamos un **identificador único** a cada bloque distinto, construyendo un "string reducido" de longitud igual al número de bloques B\*.
+   * Si el número de bloques coincide con la cantidad de identificadores, el orden está resuelto; si no, aplicamos DivSufSort recursivamente sobre este string reducido, permitiendo resolver la ordenación de B\* en un tamaño ≤ n/2.
+
+4. **Inducción de sufijos de tipo B (descendente)**
+
+   * Con los B\* ya ordenados, recorremos `SA` de derecha a izquierda.
+   * Insertamos en cada bucket los sufijos de tipo **B** (aquellos que sigan a un sufijo B\*) justo antes de sus correspondientes límites derechos, manteniendo el orden inducido por los bloques B\*.
+
+5. **Inducción de sufijos de tipo A (ascendente)**
+
+   * Finalmente, recorremos `SA` de izquierda a derecha para colocar los sufijos de tipo **A** (los que preceden a los B\*), insertándolos justo al inicio de cada bucket (límite izquierdo creciente).
+   * Este doble barrido (descendente y ascendente) completa el orden lexicográfico de todos los sufijos.
+
+#### Puntos clave de optimización
+
+* **Uso de memoria caché**:
+  Los tablets de buckets y las inserciones contiguas maximizan la localidad espacial, reduciendo fallos de caché incluso en textos de cientos de megabytes.
+* **Poca recursión**:
+  La recursión sólo actúa sobre el string reducido de sufijos B\*, cuya longitud es una fracción de `n`, con profundidad rara vez superior a **O(log n)**.
+* **Evita comparaciones directas**:
+  Al igual que SA-IS, DivSufSort induce el orden sin comparar sufijos carácter a carácter, basándose en los identificadores de bloque y en operaciones de asignación de índices.
+
+Aunque su complejidad teórica es **O(n log n)** en el peor caso, las heurísticas de Mori (división equilibrada de subrangos, manejos de histogramas rápidos y barridos eficientes) permiten que DivSufSort supere o iguale en velocidad a algoritmos lineales como SA-IS en la mayoría de aplicaciones reales. Por ello, es la implementación de referencia en bibliotecas de compresión, bioinformática y sistemas de búsqueda de texto.
+#### Ejemplo detallado de DivSufSort
+
+A continuación mostraremos paso a paso cómo **DivSufSort** construye el suffix array de la cadena
+
+```text
+T = "banana$"
+```
+
+donde `$` es la sentinela más pequeña.
+
+#### 1. Conteo de caracteres y delimitación de buckets
+
+Primero contamos la frecuencia de cada símbolo:
+
+| Carácter | `$` | `a` | `b` | `n` |
+| :------: | :-: | :-: | :-: | :-: |
+|   Frec.  |  1  |  3  |  1  |  2  |
+
+Con esos conteos definimos los **rangos contiguos** en el array `SA` (de tamaño 7) donde irá cada grupo:
+
+| Carácter | Límite izquierdo | Límite derecho |
+| :------: | :--------------: | :------------: |
+|    `$`   |         0        |        0       |
+|    `a`   |         1        |        3       |
+|    `b`   |         4        |        4       |
+|    `n`   |         5        |        6       |
+
+Inicialmente `SA = [ _, _, _, _, _, _, _]` (todas las posiciones vacías).
+
+#### 2. Clasificación de sufijos (tipo A / tipo B)
+
+Recorremos `T` de derecha a izquierda para etiquetar cada posición `i`:
+
+* **Tipo B** si
+
+  ```
+  T[i] < T[i+1]
+  o bien
+  (T[i] == T[i+1] y pos i+1 también era B)
+  ```
+* **Tipo A** en caso contrario.
+* El sufijo en la sentinela (`i = 6`) se marca siempre **B**.
+
+|  i  | T\[i] | Comparación con T\[i+1] | Tipo |
+| :-: | :---: | :---------------------: | :--: |
+|  6  |  `$`  |            --            |   B  |
+|  5  |  `a`  |         `a`> `$`        |   A  |
+|  4  |  `n`  |         `n`> `a`        |   A  |
+|  3  |  `a`  |         `a`< `n`        |   B  |
+|  2  |  `n`  |         `n`> `a`        |   A  |
+|  1  |  `a`  |         `a`< `n`        |   B  |
+|  0  |  `b`  |         `b`> `a`        |   A  |
+
+De este modo obtenemos el vector de tipos
+
+```
+[A, B, A, B, A, A, B]
+```
+
+
+#### 3. Detección de sufijos **B\*** (análogos a LMS)
+
+Los sufijos **B\*** son aquellos que **son B** y están precedidos por un **A**. Aquí:
+
+* Posición 1 (B, su anterior 0 es A)
+* Posición 3 (B, su anterior 2 es A)
+* Posición 6 (B, su anterior 5 es A)
+
+En total:
+
+```
+B* = { 1, 3, 6 }
+```
+
+#### 4. Construcción del "string reducido" y ordenación de B\*
+
+Para cada sufijo B\*, tomamos la subcadena entre esa posición y la siguiente B\* (inclusive la posición final en caso de 6):
+
+| B\* i | Subcadena correspondiente |
+| :---: | :-----------------------: |
+|   1   |      T\[1..2] = "an"      |
+|   3   |      T\[3..5] = "ana"     |
+|   6   |      T\[6..6] = "\$"      |
+
+Como las tres subcadenas son **distintas**, podemos mapearlas a símbolos únicos sin recursión:
+
+```
+"an" -> 0,    "ana" -> 1,    "$" -> 2
+```
+
+El **string reducido** queda `T' = [0,1,2]`. Su orden lexicográfico (0<1<2) nos da la secuencia de sufijos B\* **ordenados**:
+
+```
+[6, 1, 3]
+```
+
+#### 5. Colocación inicial de los sufijos B\* en SA
+
+Insertamos cada sufijo B\* en el **extremo derecho** de su bucket, según su carácter inicial:
+
+1. Sufijo `6 -> "$"`  -> bucket `$` (pos 0)
+2. Sufijo `1 -> "anana$"` -> bucket `a` (pos 3)
+3. Sufijo `3 -> "ana$"`   -> bucket `a` (pos 2)
+
+Tras esto:
+
+```
+SA = [ 6,  _,  3,  1,  _,  _,  _ ]
+```
+
+#### 6. Inducción de sufijos de tipo A (barrido ascendente)
+
+Ahora recorremos `SA` de izquierda a derecha. Cada vez que encontramos un sufijo no vacío en la posición `p = SA[i]`, comprobamos si `p>0` y si `suffix(p−1)` es de **tipo A**. Si lo es, lo ubicamos en el **extremo izquierdo** libre de su bucket:
+
+| Iteración | SA\[i] | p−1 | Tipo(p−1) | Bucket de T\[p−1] |        Posición asignada        |
+| :-------: | :----: | :-: | :-------: | :---------------: | :-----------------------------: |
+|    i=0    |    6   |  5  |     A     |        `a`        |   primer libre en `[1..3]` -> 1  |
+|    i=1    |    5   |  4  |     A     |        `n`        |   primer libre en `[5..6]` -> 5  |
+|    i=2    |    3   |  2  |     A     |        `n`        | siguiente libre en `[5..6]` -> 6 |
+|    i=3    |    1   |  0  |     A     |        `b`        |      único en `[4..4]` -> 4      |
+
+Después de estas cuatro inserciones, ya no quedan sufijos A pendientes; el array está completo:
+
+```
+SA = [6, 5, 3, 1, 0, 4, 2]
+```
+
+#### 7. Inducción de sufijos de tipo B
+
+En este ejemplo particular **no quedan sufijos B** por inducir (todos los B que no eran B\* ya se ubican correctamente); en cadenas más complejas se haría un barrido descendente idéntico, insertando cada sufijo B en el extremo derecho libre de su bucket.
+
+#### 8. Resultado final
+
+El **suffix array** de `"banana$"` obtenido es
+
+```text
+SA = [6, 5, 3, 1, 0, 4, 2]
+```
+
+que coincide con el orden lexicográfico de los sufijos:
+
+```
+"$", "a$", "ana$", "anana$", "banana$", "na$", "nana$"
+```
+
+
+Con este ejemplo se ilustra cómo DivSufSort:
+
+1. **Cuenta** caracteres y fija buckets.
+2. **Clasifica** sufijos en A/B y extrae los pivotes B\*.
+3. Construye un **string reducido** para ordenar relativamente pocos sufijos.
+4. **Induce** el orden del resto de sufijos con dos barridos sencillos.
+
+El resultado es un algoritmo extremadamente rápido en la práctica, gracias a la mínima recursión y al uso intensivo de accesos contiguos en memoria.
+
+**Observación**
+
+En este contexto, un **bucket** (o cubo) es simplemente una **región contigua** dentro del arreglo `SA` que agrupa todos los sufijos que comparten un mismo criterio, normalmente el **primer carácter** (o el primer par, triplete, etc., en variantes más avanzadas). La idea viene directamente de la técnica de **bucket sort**, donde:
+
+1. **Se cuentan** las apariciones de cada "clave" (aquí, cada carácter o prefijo) en un primer pase.
+2. A partir de esos conteos, se establecen **límites** para cada bucket: un bucket va de la posición L (límite izquierdo) a la posición R (límite derecho) en el arreglo `SA`.
+3. Cuando "insertamos" un sufijo en su bucket, lo colocamos en la siguiente posición libre dentro de ese rango, ya sea avanzando L hacia la derecha (insertar por la izquierda) o retrocediendo R hacia la izquierda (insertar por la derecha), según la fase del algoritmo.
+
+Por ejemplo, si T = `"banana$"` y nuestro alfabeto ordenado es \[`$`, `a`, `b`, `n`], podríamos tener buckets como:
+
+| Carácter | Frecuencia | Bucket en SA     |
+| :------- | :--------- | :--------------- |
+| `$`      | 1          | posiciones `0...0` |
+| `a`      | 3          | posiciones `1..3` |
+| `b`      | 1          | posiciones `4...4` |
+| `n`      | 2          | posiciones `5...6` |
+
+* El bucket de `$` abarca solo `SA[0]`.
+* El bucket de `a` va de `SA[1]` a `SA[3]`, y así sucesivamente.
+
+Durante la construcción, colocamos cada sufijo en el bucket correspondiente a su carácter inicial (o a la categoría que estemos usando), respetando siempre el orden interno que dictan los pasos de inducción o recursión. Esto evita tener que comparar sufijos completos y mantiene todo el proceso en tiempo lineal (o casi lineal) al limitar las operaciones a **contar** y **colocar en bins**.
 
