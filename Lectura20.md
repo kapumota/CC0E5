@@ -1,20 +1,5 @@
 ### **Arreglo de sufijos**
 
-#### Introducción
-
-Dentro de las estructuras de datos dedicadas al procesamiento de cadenas, los suffix trees y los suffix arrays (arreglos de sufijos) ocupan un lugar 
-privilegiado gracias a su capacidad para soportar consultas de subcadenas, búsquedas de patrones y cálculo de repetidos en tiempo casi óptimo. No obstante, su atractivo teórico decae si no encontramos maneras eficientes de construidos: un algoritmo que tarde más que la
-sencilla ordenación de sufijos dejaría a estas estructuras relegadas al ámbito académico. 
-
-Por fortuna, a lo largo de los últimos veinte años se han desarrollado técnicas que aprovechan la superposición entre sufijos y simulan comportamientos 
-similares a un "merge" múltiple para construir arreglos de sufijos de forma casi lineal. 
-
-En esta nota revisaremos, de manera detallada y fluida, cómo se definen y almacenan los arreglos de sufijos, la manera de  complementar esta información con los arreglos LCP, el algoritmo de Kasai para computarlos, el análisis de complejidad subyacente y las 
-técnicas avanzadas de construcción basadas en la clasificación de sufijos en tipos S y L, así como los dos métodos más destacados de la literatura: SA-IS y DivSufSort.
-
-
-#### Arreglos de sufijos
-
 Un arreglo de sufijos para una cadena `T` de longitud `n` (o `n+1` si incluimos explícitamente la sentinela `"$"`) es un vector de enteros `SA` de tamaño `n` (o `n+1`) donde cada entrada `SA[i]` indica la posición de inicio del i-ésimo sufijo más pequeño de `T` en orden lexicográfico. 
 Para asegurar que todos los sufijos sean distintos y haya un único mínimo, suele añadirse al final de `T` un carácter especial `"$"` que sea menor que cualquier otro símbolo del alfabeto.
 
