@@ -27,7 +27,7 @@
 * **Integrantes**: Los proyectos se realizarán en grupos de a lo más dos integrantes.
 
 
-### **Propuestas de proyectos **
+### **Propuestas de proyectos**
 
 **Proyecto 1: Deques de Kaplan y Tarjan**
 
