@@ -26,6 +26,8 @@
     * Una discusión sobre las limitaciones de la implementación actual y posibles extensiones o mejoras futuras.
 * **Integrantes**: Los proyectos se realizarán en grupos de a lo más dos integrantes.
 
+> Condición especial: si no entregan el video de manera conjunta, la calificación máxima en el proyecto será 5 puntos de un total de 20.
+
 
 ### **Propuestas de proyectos**
 
