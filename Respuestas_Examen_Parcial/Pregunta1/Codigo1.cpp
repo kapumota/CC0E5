@@ -127,6 +127,6 @@ int main() {
     root = insert(std::move(root), 15, 7);
 
     auto mx = max_in_range(root.get(), 1, 20);
-    if (mx) std::cout << "Max value in [1,20] = " << *mx << '\n';
+    if (mx) std::cout << "Valor máximo en [1,20] = " << *mx << '\n';
     return 0;
 }
