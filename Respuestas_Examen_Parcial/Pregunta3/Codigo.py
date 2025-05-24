@@ -1,6 +1,5 @@
 from __future__ import annotations
 """Motor híbrido de planificación y análisis de flujos
-========================================================
 Estructuras de datos principales:
     * Heap máximo d-ario con actualizaciones dinámicas de prioridad (DHeap)
     * Índice probabilístico tipo skip-list para búsquedas con expectativa O(log N) (SkipListIndex)
