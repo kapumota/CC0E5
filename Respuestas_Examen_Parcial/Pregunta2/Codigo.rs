@@ -2,9 +2,9 @@
 //! Rust 2021 — Suffix-tree + búsqueda de substring k-frecuente más largo
 //! (compila limpio con `cargo run --release`).
 
-/* -------------------------------------------------------------------------
-   1.  Suffix-array (ordenación O(n log² n)) + LCP (Kasai)
-   --------------------------------------------------------------------- */
+
+//   1.  Suffix-array (ordenación O(n log² n)) + LCP (Kasai)
+
 fn build_sa(text: &[u8]) -> Vec<usize> {
     let n = text.len();
     let mut sa: Vec<usize> = (0..n).collect();
@@ -51,9 +51,8 @@ fn build_lcp(text: &[u8], sa: &[usize]) -> Vec<usize> {
     lcp
 }
 
-/* -------------------------------------------------------------------------
-   2.  Árbol de sufijos compacto a partir de SA+LCP
-   --------------------------------------------------------------------- */
+
+//   2.  Árbol de sufijos compacto a partir de SA+LCP
 #[derive(Clone)]
 struct Edge { start: usize, end: usize, child: Box<Node> }
 
@@ -112,9 +111,8 @@ fn sa_lcp_to_tree(text: &[u8], sa: &[usize], lcp: &[usize]) -> Box<Node> {
     stack.pop().unwrap().0
 }
 
-/* -------------------------------------------------------------------------
-   3.  Substring k-frecuente más largo
-   --------------------------------------------------------------------- */
+
+//   3.  Substring k-frecuente más largo
 #[derive(Clone, Copy)]
 struct Candidate { depth: usize, node: *const Node }
 
@@ -170,9 +168,8 @@ fn subtree_contains(x: *const Node, y: *const Node) -> bool {
     node.edges.iter().any(|e| subtree_contains(&*e.child as *const _, y))
 }
 
-/* -------------------------------------------------------------------------
-   4.  Demo
-   --------------------------------------------------------------------- */
+//  4.  Demo
+   
 fn main() {
     let text = "banana_bandana$";     // '$' centinela único
     let k = 2;
