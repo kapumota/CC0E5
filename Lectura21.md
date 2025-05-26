@@ -5,20 +5,19 @@ En esta nota, veremos cómo esta simplificación no siempre se cumple en conjunt
 
 ### El problema de búsqueda de vecinos más cercanos 
 
-Comencemos nuestro recorrido para este capítulo imaginando un mapa que muestra algunas ciudades y la ubicación de algunos almacenes (*warehouse*) en su zona.
+Comencemos el recorrido imaginando un mapa que muestra algunas ciudades y la ubicación de algunos almacenes (*warehouse*). 
 Imagina que estás viviendo en los años 90, en los albores de la era de internet, cuando el comercio electrónico estaba dando sus primeros pasos. 
 Tienes una tienda en línea donde vendes productos de producción local colaborando con algunos minoristas. Ellos venden a tiendas físicas, y tú les proporcionas la infraestructura para vender también en línea, por una pequeña comisión.
 Cada almacén se encarga de los envíos de sus pedidos, pero para atraer más minoristas a tu plataforma, ofreces un trato especial: por cada entrega a más de 10 km, reducirás tu comisión proporcionalmente a la distancia.
-Volviendo a nuestro mapa imaginario. Eres el arquitecto principal de esta empresa y tu objetivo principal es encontrar, cuando un cliente hace un pedido, el almacén más cercano que tenga el producto en stock y, si es posible, que esté dentro de un radio de 10 km.
 
-En resumen, para que tu empresa se mantenga operativa (y para conservar tu trabajo), es vital que siempre redirijas a cada usuario al almacén más cercano. 
+Volviendo al mapa imaginario. Eres el arquitecto principal de esta empresa y tu objetivo principal es encontrar, cuando un cliente hace un pedido, el almacén más cercano que tenga el producto en stock y, si es posible, que esté dentro de un radio de 10 km. En resumen, para que tu empresa se mantenga operativa (y para conservar tu trabajo), es vital que siempre redirijas a cada usuario al almacén más cercano. 
+
 Imagina que alguien desde Ciudad Gótica intenta ordenar un queso francés. Miras tu lista de almacenes, calculas la distancia entre la dirección del cliente y cada uno de ellos, y eliges el más cercano, P-5. Inmediatamente después, alguien desde Metrópolis compra dos ruedas del mismo queso; lamentablemente, no puedes usar ninguna de las distancias calculadas antes, porque el punto de origen (la ubicación del cliente) es completamente diferente.
-Así que simplemente vuelves a recorrer la lista de tiendas, calculas todas las distancias, y eliges el almacén B-2. Si el siguiente pedido viene, por ejemplo, desde Civic City. 
-Tienes que volver a calcular todas las N distancias para todos los N almacenes.
+Así que simplemente vuelves a recorrer la lista de tiendas, calculas todas las distancias, y eliges el almacén B-2. Si el siguiente pedido viene, por ejemplo, desde Civic City.  Tienes que volver a calcular todas las N distancias para todos los N almacenes.
 
 #### Soluciones
 
-Ahora bien, sé que nuestro mapa imaginario solo muestra cinco almacenes, así que parece una operación trivial y rápida revisar todos ellos para cada usuario. Incluso podrías gestionar los pedidos manualmente, eligiendo caso por caso basándote en tu intuición y experiencia.
+Ahora bien, sé que el  mapa imaginario indica solo cinco almacenes, así que parece una operación trivial y rápida revisar todos ellos para cada usuario. Incluso podrías gestionar los pedidos manualmente, eligiendo caso por caso basándote en tu intuición y experiencia.
 
 Pero supón que, tras un año, como tu negocio va bien, más tiendas deciden vender en tu sitio web, y ya tienes cerca de cien en esa misma área. 
 Eso se vuelve complicado, y tu equipo de atención al cliente no puede manejar mil pedidos al día: seleccionar manualmente el lugar más cercano para cada
@@ -69,8 +68,7 @@ almacenes = {
 
 Pero luego de otro año, el negocio va tan bien que tu CEO decide que están listos para operar a nivel nacional tras cerrar un trato que hará que cientos o miles de tiendas medianas y grandes (distribuidas por todo el país) se unan a tu plataforma.
 
-Calcular millones de distancias por usuario empieza a parecer abrumador e ineficiente además, dado que estamos en los años 90, los servidores no son tan rápidos, los centros de datos son una rareza y las granjas de servidores son cosas de grandes compañías como IBM. 
-Aún no existen como recurso para el comercio electrónico.
+Calcular millones de distancias por usuario empieza a parecer abrumador e ineficiente además, dado que estamos en los años 90, los servidores no son tan rápidos, los centros de datos son una rareza y las granjas de servidores son cosas de grandes compañías como IBM.  Aún no existen como recurso para el comercio electrónico.
 
 
 #### Primeros intentos 
@@ -78,9 +76,8 @@ Aún no existen como recurso para el comercio electrónico.
 Tu primera propuesta puede ser precalcular el almacén más cercano para cada usuario de una vez por todos los productos, pero eso no funciona realmente, porque los usuarios pueden mudarse, o a veces quieren que se les envíe el producto a su oficina o al correo, y no a su casa. 
 Además, la disponibilidad de productos cambiará con el tiempo, por lo que la tienda más cercana no siempre será la mejor. Tendrías que mantener una lista de tiendas ordenadas por distancia para cada cliente (o al menos cada ciudad).
 
-Razonando en 2D, podríamos intentar un enfoque distinto, inspirado en los mapas reales: dividir nuestro mapa en secciones, usando una cuadrícula regular. 
-De esta forma, podemos encontrar fácilmente en qué sección cae un punto a partir de sus coordenadas (simplemente dividiendo el valor de cada coordenada por el tamaño de la celda) y buscar los puntos más cercanos en esa celda o en las celdas vecinas.
-Esto ayuda a reducir el número de puntos que necesitamos comparar; sin embargo, hay una trampa. 
+Razonando en 2D, podríamos intentar un enfoque distinto, inspirado en los mapas reales: dividir el mapa en secciones, usando una cuadrícula regular. 
+De esta forma, podemos encontrar fácilmente en qué sección cae un punto a partir de sus coordenadas (simplemente dividiendo el valor de cada coordenada por el tamaño de la celda) y buscar los puntos más cercanos en esa celda o en las celdas vecinas. Esto ayuda a reducir el número de puntos que necesitamos comparar; sin embargo, hay una trampa. 
 
 Este enfoque funciona si los datos están espaciados de forma regular, lo cual no suele ser el caso en conjuntos de datos reales.
 
@@ -126,11 +123,12 @@ Necesitamos algo diferente, algo más flexible.
 #### Simplificar las cosas para obtener una pista 
 
 La solución a este problema parece escurridiza. En estos casos, a veces ayuda resolver una versión simplificada del problema y luego idear una solución general que funcione para el problema original. 
-Supongamos, por ejemplo, que pudiéramos restringir nuestra búsqueda a un espacio unidimensional. 
-Digamos que necesitamos atender solo a clientes en una única carretera que se extiende por kilómetros, y todos nuestros almacenes también están colocados a lo largo de esa misma carretera.
 
-Para simplificar aún más, supongamos que la carretera es perfectamente recta, y que la distancia total cubierta es lo suficientemente corta como para no preocuparnos por la curvatura de la Tierra, latitud, longitud, etc. 
-Básicamente, asumimos que una aproximación con un segmento 1D es suficiente, y podemos usar la distancia euclidiana en 1D como una estimación de la distancia real entre ciudades.
+Supongamos, por ejemplo, que pudiéramos restringir la búsqueda a un espacio unidimensional. 
+
+Digamos que necesitamos atender solo a clientes en una única carretera que se extiende por kilómetros y todos los almacenes también están colocados a lo largo de esa misma carretera.
+
+Para simplificar aún más, supongamos que la carretera es perfectamente recta, y que la distancia total cubierta es lo suficientemente corta como para no preocuparnos por la curvatura de la Tierra, latitud, longitud, etc.  Básicamente, asumimos que una aproximación con un segmento 1D es suficiente, y podemos usar la distancia euclidiana en 1D como una estimación de la distancia real entre ciudades.
 
 Podemos representar las ubicaciones en esta línea como simples números.
 ```python
@@ -150,10 +148,9 @@ puntos_ordenados_1d = sorted(ubicaciones_1d.items(), key=lambda item: item[1])
 # for nombre, pos in puntos_ordenados_1d:
 # print(f"- {nombre}: {pos}")
 ```
-Esta es una aproximación del escenario inicial, donde esos puntos pertenecen a un plano 2-D, que a su vez es una aproximación de la realidad, donde los mismos puntos están en una superficie curva tridimensional.
-Dependiendo del caso de uso, puede que nos baste con alguna de las aproximaciones, o que necesitemos un modelo más preciso que tenga en cuenta la curvatura terrestre.
+Esta es una aproximación del escenario inicial, donde esos puntos pertenecen a un plano 2-D, que a su vez es una aproximación de la realidad, donde los mismos puntos están en una superficie curva tridimensional. Dependiendo del caso de uso, puede que nos baste con alguna de las aproximaciones, o que necesitemos un modelo más preciso que tenga en cuenta la curvatura terrestre.
 
-Dado un punto aleatorio en el segmento, queremos saber cuál de los puntos de referencia está más cerca.  Estando en un caso 1-D, esto se parece mucho a una búsqueda binaria.
+Dado un punto aleatorio en el segmento, queremos saber cuál de los puntos de referencia está más cerca. Estando en un caso 1-D, esto se parece mucho a una búsqueda binaria.
 
 ```python
 import bisect
@@ -220,7 +217,7 @@ valores_1d = [pos for _, pos in puntos_ordenados_1d] # Extraer solo las posicion
 
 #### Elegir cuidadosamente una estructura de datos
 
-La búsqueda binaria en un array es útil, pero los arrays no son conocidos por su flexibilidad.  Si quisiéramos agregar un nuevo punto entre W-3 y B-2, tendríamos que mover todos los elementos desde B-2 hasta B-4, y posiblemente realocar el array si es estático.
+La búsqueda binaria en un array es útil, pero los arrays no son conocidos por su flexibilidad. Si quisiéramos agregar un nuevo punto entre W-3 y B-2, tendríamos que mover todos los elementos desde B-2 hasta B-4, y posiblemente realocar el array si es estático.
 
 Afortunadamente, conocemos una estructura de datos más flexible que los arrays y que nos permite realizar búsquedas binarias eficientemente. Como su nombre indica, un **árbol binario de búsqueda (BST)** es lo que buscamos. 
 
@@ -273,10 +270,9 @@ def insertar_bst(raiz, clave, valor=None):
 ```
 Para este ejemplo, mostramos un árbol que contiene tanto ciudades como almacenes. 
 
-Puedes imaginar, para simplificar, que cada ciudad tiene un gran almacén o centro de distribución, así que nuestras búsquedas simplemente devuelven la entrada 
-más cercana (ya sea ciudad o almacén) a un cliente (que no está en una ciudad del árbol).
+Puedes imaginar, para simplificar, que cada ciudad tiene un gran almacén o centro de distribución, así que nuestras búsquedas simplemente devuelven la entrada más cercana (ya sea ciudad o almacén) a un cliente (que no está en una ciudad del árbol).
 
-Y en efecto, las operaciones de inserción, eliminación y búsqueda están garantizadas como logarítmicas en nuestro BST balanceado. 
+Y en efecto, las operaciones de inserción, eliminación y búsqueda están garantizadas como logarítmicas en el BST balanceado. 
 Esto es mucho mejor que nuestra búsqueda lineal inicial. Un tiempo logarítmico crece increíblemente lento; solo piensa que para un millón de puntos, 
 pasaríamos de calcular un millón de distancias a solo unas 20.
 
@@ -395,7 +391,8 @@ def vecino_mas_cercano_bst_1d(raiz, clave_objetivo):
 # El más cercano es 80.
 ```
 
-Entonces, ¿cuál es el algoritmo para encontrar el vecino más cercano de un punto 1-D, cuando nuestro conjunto de datos está almacenado en un árbol binario de búsqueda?
+Entonces, ¿cuál es el algoritmo para encontrar el vecino más cercano de un punto 1-D, cuando el conjunto de datos está almacenado en un árbol binario de búsqueda? Podemos proponer:
+
 1.  Ejecuta una búsqueda en el árbol binario.
 2.  Si hay una coincidencia exacta, la entrada encontrada es el vecino más cercano (distancia 0).
 3.  Si no hay coincidencia exacta, compara cuál de estas dos entradas está más cerca del objetivo: el último nodo visitado o su nodo padre.
@@ -408,9 +405,7 @@ Ahora que hemos resuelto brillantemente el problema en 1-D, surge la pregunta: �
 Por supuesto, la respuesta es sí. Probablemente, el hecho de que hayamos planteado la pregunta ya te llevó a sospecharlo. Pero, aun así, pasar de 1-D a 2-D es un gran salto. No hay una forma sencilla de imaginar un árbol que funcione en dos dimensiones. 
 Una vez que hayamos dado ese salto, será fácil pasar a 3-D y, en general, a hiperespacios con un número arbitrario de dimensiones.
 
-Tampoco estaremos limitados a conjuntos de datos que se encuentren en el espacio geométrico 2-D o 3-D. Las dimensiones pueden ser cualquier cosa, siempre que podamos definir una medida de distancia sobre ellas, con la salvedad de que esta medida debe
-cumplir ciertos requisitos, concretamente, debe ser una distancia euclidiana. Por ejemplo, podemos tener entradas en 2-D donde la primera coordenada sea
-el precio y la segunda la calificación, y luego pedir la entrada más cercana a una tupla objetivo, como ($100, 4.5 estrellas). 
+Tampoco estaremos limitados a conjuntos de datos que se encuentren en el espacio geométrico 2-D o 3-D. Las dimensiones pueden ser cualquier cosa, siempre que podamos definir una medida de distancia sobre ellas, con la salvedad de que esta medida debe cumplir ciertos requisitos, concretamente, debe ser una distancia euclidiana. Por ejemplo, podemos tener entradas en 2-D donde la primera coordenada sea el precio y la segunda la calificación, y luego pedir la entrada más cercana a una tupla objetivo, como ($100, 4.5 estrellas). 
 
 Más aún, también podremos pedir las N entradas más cercanas a esa tupla.
 
@@ -424,7 +419,7 @@ Pero no solo eso: también proporcionarán algunas operaciones especiales:
 Presentemos brevemente las tres estructuras que vamos a describir:
 
 * **Árbol k-d:** Un árbol k-d es un árbol binario especial en el que cada nodo no hoja representa un hiperplano de división que divide el espacio k-dimensional en dos semi-espacios. Los puntos en un lado del hiperplano se almacenan en el subárbol izquierdo y los del otro lado, en el subárbol derecho.
-* **Árbol R (R-tree):** La “R” viene de rectángulo. Un árbol R agrupa puntos cercanos y define el mínimo recuadro contenedor (hiper-rectángulo) que los abarca. Los puntos se particionan jerárquicamente en cajas mínimas contenedoras, una por cada nodo intermedio, con la raíz abarcando todos los puntos.
+* **Árbol R (R-tree):** La "R" viene de rectángulo. Un árbol R agrupa puntos cercanos y define el mínimo recuadro contenedor (hiper-rectángulo) que los abarca. Los puntos se particionan jerárquicamente en cajas mínimas contenedoras, una por cada nodo intermedio, con la raíz abarcando todos los puntos.
 * **Árbol SS (Similarity Search Tree):** Similar a los árboles R, pero en lugar de usar hiper-rectángulos, los árboles SS usan hiper-esferas como regiones de agrupación. Las hojas contienen puntos, mientras que las esferas internas agrupan otras hiper-esferas.
 
 Finalmente, definamos una interfaz genérica, común a todas las implementaciones concretas:
