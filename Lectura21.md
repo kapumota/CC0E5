@@ -6,6 +6,10 @@ En esta nota, veremos cómo esta simplificación no siempre se cumple en conjunt
 ### El problema de búsqueda de vecinos más cercanos 
 
 Comencemos el recorrido imaginando un mapa que muestra algunas ciudades y la ubicación de algunos almacenes (*warehouse*). 
+
+<img src="https://github.com/kapumota/CC0E5/blob/main/data/Ciudades.png" alt="Descripción" width="650" height="400">
+
+
 Imagina que estás viviendo en los años 90, en los albores de la era de internet, cuando el comercio electrónico estaba dando sus primeros pasos. 
 Tienes una tienda en línea donde vendes productos de producción local colaborando con algunos minoristas. Ellos venden a tiendas físicas, y tú les proporcionas la infraestructura para vender también en línea, por una pequeña comisión.
 Cada almacén se encarga de los envíos de sus pedidos, pero para atraer más minoristas a tu plataforma, ofreces un trato especial: por cada entrega a más de 10 km, reducirás tu comisión proporcionalmente a la distancia.
@@ -270,10 +274,10 @@ def insertar_bst(raiz, clave, valor=None):
 ```
 Para este ejemplo, mostramos un árbol que contiene tanto ciudades como almacenes. 
 
-Puedes imaginar, para simplificar, que cada ciudad tiene un gran almacén o centro de distribución, así que nuestras búsquedas simplemente devuelven la entrada más cercana (ya sea ciudad o almacén) a un cliente (que no está en una ciudad del árbol).
+Puedes imaginar, para simplificar, que cada ciudad tiene un gran almacén o centro de distribución, así que las búsquedas simplemente devuelven la entrada más cercana (ya sea ciudad o almacén) a un cliente (que no está en una ciudad del árbol).
 
 Y en efecto, las operaciones de inserción, eliminación y búsqueda están garantizadas como logarítmicas en el BST balanceado. 
-Esto es mucho mejor que nuestra búsqueda lineal inicial. Un tiempo logarítmico crece increíblemente lento; solo piensa que para un millón de puntos, 
+Esto es mucho mejor que la búsqueda lineal inicial. Un tiempo logarítmico crece increíblemente lento; solo piensa que para un millón de puntos, 
 pasaríamos de calcular un millón de distancias a solo unas 20.
 
 El siguiente código muestra cómo ejecutaríamos una búsqueda en el BST para encontrar el vecino más cercano de un punto cuya coordenada x es 75.
@@ -469,7 +473,7 @@ Hemos mostrado que es posible resolver eficientemente el problema del vecino má
 Sin embargo, al pasar de 1-D a 2-D, la situación se complica un poco, ya que en cada nodo no tenemos una bifurcación clara entre dos caminos, es decir, hijos izquierdo y derecho.
 
 **Búsqueda binaria unidimensional**
-Para resumir: es fácil realizar búsqueda binaria cuando nuestras entradas están en un espacio unidimensional (ℝ). Cada punto en esa línea define implícitamente una izquierda y una derecha, lo cual se mapea naturalmente a los caminos izquierdo y derecho de un nodoen un BST.
+Para resumir: es fácil realizar búsqueda binaria cuando las entradas están en un espacio unidimensional (ℝ). Cada punto en esa línea define implícitamente una izquierda y una derecha, lo cual se mapea naturalmente a los caminos izquierdo y derecho de un nodoen un BST.
 
 **Pasando a dimensiones superiores**
 Ahora, ¿qué pasa con ℝ² (puntos en un plano euclidiano bidimensional) o ℂ (números complejos)? La búsqueda binaria ya no es tan clara. 
