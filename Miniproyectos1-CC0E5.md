@@ -3,9 +3,9 @@
 * **Evaluación:** Cada proyecto se califica sobre un máximo de 7 puntos. La calidad de la implementación, las pruebas y el análisis de rendimiento (cuaderno de resultados) constituyen hasta 6 puntos.
 * **Presentación:** La entrega del trabajo aporta como máximo 1 punto. La presentación y exposición puntúa sobre 6.
 
-* **Fecha de presentación:** 1 de junio, a partir de las 9:00 am. Y forma parte de un trabajo adicional solicitado relacionado al examen parcial del curso.
+* **Fecha de presentación:** 1 de junio, a partir de las 9:00 am. Y forma parte de un trabajo adicional solicitado relacionado al examen parcial del curso. 
 
-* **Entregable:** Un cuaderno de resultados detallado con pruebas funcionales, benchmarking (comparativas de tiempo y uso de memoria) y profiling (análisis de puntos críticos del código).
+* **Entregable:** Un archivo comprimido contiene el cuaderno de resultados detallado con pruebas funcionales, benchmarking (comparativas de tiempo y uso de memoria) y profiling (análisis de puntos críticos del código).
 * **No se presenta el código fuente directamente en la exposición, sino los resultados y análisis.**. El código fuente es un apoyo a tu exposición.
 
 
