@@ -508,13 +508,13 @@ def obtener_cuadrante(punto_referencia, punto_a_clasificar):
     pac_x, pac_y = punto_a_clasificar
 
     if pac_x >= pr_x and pac_y >= pr_y:
-        return "Superior Derecho (NE)"
+        return "superior derecho (NE)"
     elif pac_x < pr_x and pac_y >= pr_y:
-        return "Superior Izquierdo (NW)"
+        return "superior izquierdo (NW)"
     elif pac_x < pr_x and pac_y < pr_y:
-        return "Inferior Izquierdo (SW)"
+        return "inferior izquierdo (SW)"
     elif pac_x >= pr_x and pac_y < pr_y:
-        return "Inferior Derecho (SE)"
+        return "inferior derecho (SE)"
     # Casos sobre los ejes se asignan a un cuadrante por convención.
 
 # R = (50, 50) # Punto de referencia inicial
@@ -522,10 +522,10 @@ def obtener_cuadrante(punto_referencia, punto_a_clasificar):
 # U = (20, 60)
 
 # print(f"P ({P}) con respecto a R ({R}): {obtener_cuadrante(R, P)}")
-# # P está en el cuadrante Superior Izquierdo de R.
+# # P está en el cuadrante superior izquierdo de R.
 # # Ahora si P se vuelve el nuevo punto de referencia para U:
 # print(f"U ({U}) con respecto a P ({P}): {obtener_cuadrante(P, U)}")
-# # U está en el cuadrante Inferior Izquierdo de P.
+# # U está en el cuadrante inferior izquierdo de P.
 ```
 Esto parece funcionar para ℝ², considerando ambas coordenadas. 
 
