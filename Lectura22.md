@@ -1,4 +1,4 @@
-### Informe técnico: k-d trees para indexación multidimensional
+### k-d trees para indexación multidimensional
 
 #### Introducción
 
