@@ -414,6 +414,88 @@ i
 
 Este proceso manual deja claro cómo alternar ejes en cada nivel (`depth % 2`) y cómo conectar nodos en un BST.
 
+
+#### Ejemplo manual en 3-D
+
+Aquí tienes un ejemplo **paso a paso** de cómo se construye un k-d tree en **3 dimensiones** (k=3) sobre un pequeño conjunto de puntos, mostrando explícitamente la elección de la coordenada de corte en cada nivel:
+
+#### Conjunto de puntos de ejemplo
+
+| Etiqueta | $x$ | $y$ | $z$ |
+| :------: | :-: | :-: | :-: |
+|   **A**  |  2  |  3  |  5  |
+|   **B**  |  5  |  4  |  2  |
+|   **C**  |  9  |  6  |  7  |
+|   **D**  |  4  |  7  |  9  |
+|   **E**  |  8  |  1  |  5  |
+|   **F**  |  7  |  2  |  6  |
+|   **G**  |  3  |  5  |  8  |
+
+
+#### Nivel 0  $(i=0)$ -> coordenada $d = 0 \bmod 3 = 0$ (eje $x$)
+
+1. **Ordenamos** todos los puntos por su $x$:
+
+   $$A(2),G(3), D(4), B(5), F(7), E(8), C(9).$$
+2. **Pivote** = mediana = cuarto elemento = **B**$(5,4,2)$.
+3. **Particiones**:
+
+   * **Izquierda** ($x < 5$): $\{A,G,D\}$.
+   * **Derecha**  ($x > 5$): $\{F,E,C\}$.
+
+
+#### Nivel 1  $(i=1)$ -> coordenada $d = 1 \bmod 3 = 1$ (eje $y$)
+
+#### 1. Subárbol izquierdo de **B** con $\{A,G,D\}$
+
+* Orden por $y$:
+
+  $$A(3), G(5), D(7).$$
+* Pivote = **G**$(3,5,8)$.
+* Particiones:
+
+  * Izquierda ($y < 5$): $\{A\}$.
+  * Derecha  ($y > 5$): $\{D\}$.
+
+#### 2. Subárbol derecho de **B** con $\{F,E,C\}$
+
+* Orden por $y$:
+
+  $$E(1), F(2), C(6)$$
+* Pivote = **F**$(7,2,6)$.
+* Particiones:
+
+  * Izquierda ($y < 2$): $\{E\}$.
+  * Derecha  ($y > 2$): $\{C\}$.
+
+#### Nivel 2  $(i=2)$ -> coordenada $d = 2 \bmod 3 = 2$ (eje $z$)
+
+En este nivel cada partición resultante tiene **solo un punto**, así que se convierten en hojas. Si alguna tuviese más, ordenaríamos por $z$ y elegiríamos la mediana.
+
+#### Representación final del árbol
+
+```
+                       B (5,4,2)  [corte en x]
+                      /           \
+       G (3,5,8) [corte en y]     F (7,2,6) [corte en y]
+        /       \                  /         \
+A(2,3,5)[hoja] D(4,7,9)[hoja]  E(8,1,5)[hoja] C(9,6,7)[hoja]
+```
+
+* Entre corchetes indicamos **la coordenada usada** para partir en ese nivel.
+* Cada nodo tiene **dos hijos** (o ninguno si es hoja).
+* La profundidad $i$ determina el eje: $i\mod3 = 0\mapsto x$, $1\mapsto y$, $2\mapsto z$.
+
+##### ¿Qué hemos logrado?
+
+* **Binario**: cada partición es **solo** en dos mitades, independientemente de $k$.
+* **Ciclo de ejes**: recorremos las $k$ coordenadas de forma cíclica.
+* **Regiones acotadas**: tras $k$ cortes (uno por cada eje), cada caja está limitada en todas las dimensiones.
+* **Búsqueda e inserción**: idénticas a un BST, comparando sucesivamente con la coordenada correspondiente.
+
+Este mismo procedimiento funciona para **cualquier $k$**: basta con rotar la elección de eje mediante $d = i \bmod k$. Así obtenemos un **k-d tree** que crece en tiempo $O(n\log n)$ y permite búsquedas de vecinos cercanos en $O(\log n)$ promedio.
+
+
 #### Construcción automática de un k-d tree 2D
 
 Para generar de forma automática un árbol balanceado, se usa la mediana de cada sublista como pivote:
