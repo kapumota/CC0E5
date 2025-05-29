@@ -96,9 +96,8 @@ G (1,5)
 * **Profundidad** = 0 -> `axis = 0 mod 2 = 0` => **eje *x***.
 * Ordenamos por *x*:
 
-  $$
-    G(1),\; A(2),\; D(4),\; \mathbf{B(5)},\; F(7),\; E(8),\; C(9)
-  $$
+  $$G(1),A(2), D(4), B(5), F(7),E(8),C(9)$$
+  
 * **Pivote** = mediana = cuarto = **B(5,4)**.
 * Subárbol izquierdo: puntos con *x* < 5 -> $\{G,A,D\}$.
 * Subárbol derecho: puntos con *x* > 5 -> $\{F,E,C\}$.
@@ -117,9 +116,7 @@ G (1,5)
 * **Profundidad** = 1 -> `axis = 1 mod 2 = 1` => **eje *y***.
 * Conjunto $\{G(1,5), A(2,3), D(4,7)\}$, ordenamos por *y*:
 
-  $$
-    A(2,3),\; \mathbf{G(1,5)},\; D(4,7)
-  $$
+  $$A(2,3), G(1,5), D(4,7)$$
 * **Pivote** = G(1,5).
 * Izquierda de G: $\{A\}$ (y<5).
 * Derecha de G:   $\{D\}$ (y>5).
@@ -129,9 +126,8 @@ G (1,5)
 * **Profundidad** = 1 -> `axis = 1 mod 2 = 1` => **eje *y***.
 * Conjunto $\{F(7,2), E(8,1), C(9,6)\}$, ordenamos por *y*:
 
-  $$
-    E(8,1),\; \mathbf{F(7,2)},\; C(9,6)
-  $$
+  $$E(8,1),F(7,2), C(9,6)$$
+
 * **Pivote** = F(7,2).
 * Izquierda de F: $\{E\}$ (y<2).
 * Derecha de F:   $\{C\}$ (y>2).
@@ -167,7 +163,7 @@ Y cada nodo **"corta"** el plano:
 
 De este modo, **ciclamos** ejes en cada nivel, cada partición es **binaria** y, si elegimos la mediana, el resultado es un **árbol balanceado** con coste medio $O(\log n)$ para búsquedas e inserciones.
 
-#### 5. Ejemplo de partición manual en 2D 
+#### Ejemplo de partición manual en 2D 
 
 Para ilustrar el proceso de partición, a continuación se muestra un ejemplo manual con ocho puntos etiquetados. El código siguiente implementa los primeros tres pasos de partición:
 
@@ -250,7 +246,7 @@ print(f"[Paso 3] Considerando sub-partición superior izquierda. Pivote: {pivote
 
 En cada paso alternamos el eje de partición (*x* primero, luego *y*, luego de nuevo *x*). Así se generan recursivamente subregiones delineadas por líneas verticales y horizontales.
 
-#### 6. Definición formal de un k-d tree como BST
+####  Definición formal de un k-d tree como BST
 
 Un **k-d tree** puede describirse como un árbol de búsqueda binaria (BST) cuyos nodos contienen puntos k-dimensionales y utilizan un método de comparación que solo considera la coordenada `axis = depth mod k`. Cada nodo:
 
@@ -299,10 +295,10 @@ def build_kdtree_1d(points: List[Any], depth: int = 0) -> Optional[Node1D]:
     pivot = sorted_points[mid]
 
     print(f"[Construcción 1D] Profundidad={depth}, Eje={axis}, Pivote={pivot}")
-    print(f"  → Lista original: {points}")
-    print(f"  → Lista ordenada: {sorted_points}")
-    print(f"  → Sublista izquierda: {sorted_points[:mid]}")
-    print(f"  → Sublista derecha: {sorted_points[mid+1:]}")
+    print(f"  -> Lista original: {points}")
+    print(f"  -> Lista ordenada: {sorted_points}")
+    print(f"  -> Sublista izquierda: {sorted_points[:mid]}")
+    print(f"  -> Sublista derecha: {sorted_points[mid+1:]}")
 
     node = Node1D(point=pivot, axis=axis, depth=depth)
     node.left = build_kdtree_1d(sorted_points[:mid], depth + 1)
@@ -310,14 +306,13 @@ def build_kdtree_1d(points: List[Any], depth: int = 0) -> Optional[Node1D]:
     return node
 
 
-if __name__ == "__main__":
-    # Ejemplo de uso
-    sample_points = [50, 30, 70, 20, 80, 25, 60, 90]
-    print("\n[Iniciando construcción del k-d tree 1D]")
-    tree = build_kdtree_1d(sample_points)
-    print("\n[Resultado] k-d tree 1D construido:")
-    print(tree or "El árbol está vacío.")
 
+# Ejemplo de uso
+sample_points = [50, 30, 70, 20, 80, 25, 60, 90]
+print("\n[Iniciando construcción del k-d tree 1D]")
+tree = build_kdtree_1d(sample_points)
+print("\n[Resultado] k-d tree 1D construido:")
+print(tree or "El árbol está vacío.")
 
 ```
 
@@ -579,24 +574,24 @@ Más allá de 3D, no existe una representación geométrica intuitiva, pero el m
 
 ####  Cobertura y eficiencia en la búsqueda
 
-**1. Cobertura jerárquica de cada nodo**
+**Cobertura jerárquica de cada nodo**
 En un k-d tree, cada nodo representa un pivote y divide el espacio en dos según la coordenada que le corresponda (eje = profundidad mod k). 
 La región "cubierta" por un nodo $N$ es el conjunto de puntos que, al buscarse, atraviesan $N$. 
 Formalmente, la región de $N$ es la intersección de todos los semiespacios definidos por sus ancestros: para cada ancestro $A$ con eje de partición $a_A$ y pivote $p_A$, le 
 corresponde una condición $x_{a_A}<p_{A,a_A}$ si $N$ está en el subárbol izquierdo de $A$, o $x_{a_A}\ge p_{A,a_A}$ si está en el derecho. De este modo, cada nodo define un hiperrectángulo que encierra exactamente los puntos que caen dentro de esa serie de restricciones.
 
-**2. Búsqueda exacta en un k-d tree**
+**Búsqueda exacta en un k-d tree**
 Para determinar si existe un punto $X$ (o en qué hoja terminaría su recorrido), partimos de la raíz y, en cada nodo con pivote $p$ y 
 eje $a$, comparamos $X_a$ con $p_a$. Si $X_a<p_a$ descendemos al hijo izquierdo; en caso contrario, al hijo derecho.
 Avanzamos incrementando la profundidad y ciclando el eje, hasta encontrar $X$ o llegar a un subárbol vacío. 
 Cada comparación descarta inmediatamente toda la mitad opuesta del espacio, lo que, en promedio, produce un recorrido de longitud $O(\log n)$.
 
-**3. Alternancia de ejes y balance espacial**
+**Alternancia de ejes y balance espacial**
 Si siempre partiéramos según la misma coordenada (por ejemplo, $x$), generaríamos particiones infinitas paralelas al eje $y$ y regiones sin 
 acotar en esa dirección. 
 En cambio, al alternar ejes $x,y,x,y,\dots$ en 2-D, o ciclando entre las $k$ dimensiones en $\mathbb R^k$, tras $k$ niveles cada región queda limitada por dos planos en cada dimensión. Esto reduce la superposición de particiones y favorece que, con pivotes tipo mediana, el árbol resulte aproximadamente balanceado.
 
-**4. Complejidad y eficiencia**
+**Complejidad y eficiencia**
 
 * **Construcción**: si en cada nivel seleccionamos la mediana (ordenando o con `nth_element`), la recurrencia $T(n)=2T(n/2)+O(n)$ da $O(n\log n)$.
 * **Búsqueda exacta**: en promedio $O(\log n)$, pues cada comparación descarta la mitad de los puntos; en el peor caso (árbol degenerado) puede llegar a $O(n)$.
@@ -604,6 +599,7 @@ En cambio, al alternar ejes $x,y,x,y,\dots$ en 2-D, o ciclando entre las $k$ dim
 * **Búsqueda de rango ortogonal**: explora todos los nodos cuyas regiones intersectan el rango; su coste es $O(n^{1-1/k}+m)$, donde $m$ es el número de puntos reportados.
 
 **5.¿Por qué es rápido?**
+
 El k-d tree combina la simplicidad y las garantías de un BST (comparaciones binarias y recorrido logarítmico en promedio) con un método de comparación cíclico que acota regiones en todas las dimensiones. Así, cada comparación permite **podar** de manera inmediata grandes porciones del espacio de búsqueda, logrando consultas muy eficientes tanto para búsquedas exactas como para vecinos más cercanos o rangos multidimensionales.
 
 
