@@ -678,8 +678,8 @@ class KdTree:
         """Representación de cadena del árbol."""
         return f"<KdTree size={self.size} dims={self.dimensionality}>"
 
-# --- Código de Pruebas ---
-print("--- Inicializando Pruebas del KdTree ---")
+#Código de pruebas
+print("Inicializando pruebas del KdTree:")
 points_2d = [Point([2, 3]), Point([5, 4]), Point([9, 6]), Point([4, 7]), Point([8, 1]), Point([7, 2])]
 tree_2d = KdTree(points_2d)
 print(f"Árbol creado: {tree_2d}, Altura: {tree_2d.height}")
@@ -692,4 +692,4 @@ region = Cube(Point([4, 4]), Point([7, 8]))
 print(f"Puntos en {region}: {list(tree_2d.pointsInRegion(region))}")
 tree_2d.delete(Point([9, 6]))
 print(f"Eliminado Point([9, 6]), ¿Contiene? {tree_2d.contains(Point([9, 6]))}, Nuevo tamaño: {tree_2d.size}")
-print("--- Pruebas Finalizadas ---")
+print("Pruebas finalizadas.")
