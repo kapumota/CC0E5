@@ -38,20 +38,41 @@ class Point:
         dist_sq = sum((s - o)**2 for s, o in zip(self._coordinates, other_point._coordinates))
         return math.sqrt(dist_sq)
 
+    def __eq__(self, other):
+        """
+        Compara si dos puntos son iguales (misma dimensionalidad y coordenadas).
+        """
+        if not isinstance(other, Point):
+            return NotImplemented
+        return self._coordinates == other._coordinates
+
+    # Mantenemos 'equals' como alias de __eq__ para compatibilidad con versiones anteriores
     def equals(self, other_point):
         """
-        Comprueba si este punto es igual a otro.
-        :param other_point: Otro objeto.
+        (Alias) Comprueba si este punto es igual a otro.
+        :param other_point: Otro objeto Point.
         :return: True si son el mismo punto, False en caso contrario.
         """
-        if not isinstance(other_point, Point):
-            return False
-        return self._coordinates == other_point._coordinates
+        return self == other_point
+
+    def __hash__(self):
+        """
+        Genera un hash para el punto, permitiendo su uso en sets o como claves de diccionario.
+        """
+        return hash(self._coordinates)
 
     @property
     def coordinates(self):
         """Propiedad para acceder a las coordenadas como tupla."""
         return self._coordinates
+
+    def __getitem__(self, index):
+        """Permite acceder a las coordenadas usando p[dim]."""
+        return self.coordinate(index)
+
+    def __len__(self):
+        """Devuelve la dimensionalidad del punto."""
+        return self.dimensionality
 
     @staticmethod
     def validatePointArray(points, expected_dimensionality, context):
@@ -77,11 +98,9 @@ class Point:
 
     def __repr__(self):
         """Representación de cadena del punto."""
-        return f"Point({self._coordinates})"
+        # Ajustamos para que muestre la lista de coordenadas, tal como el texto sugiere.
+        return f"Point({list(self._coordinates)})"
 
-    def __getitem__(self, index):
-        """Permite acceder a las coordenadas usando p[dim]."""
-        return self.coordinate(index)
 
 class Cube:
     """
@@ -170,6 +189,7 @@ class Cube:
         """Representación de cadena del cubo."""
         return f"Cube(bottom={self.bottom}, top={self.top})"
 
+
 def median(points, key_func):
     """
     Encuentra el punto mediano y particiona los otros puntos en listas izquierda y derecha.
@@ -186,19 +206,22 @@ def median(points, key_func):
     median_point = sorted_points[median_index]
 
     left_points = sorted_points[:median_index]
-    right_points = sorted_points[median_index + 1:] # Excluye la mediana.
+    right_points = sorted_points[median_index + 1:]  # Excluye la mediana.
 
     return median_point, left_points, right_points
+
 
 def is_number(value):
     """Comprueba si un valor es un número (int o float)."""
     return isinstance(value, (int, float)) and not isinstance(value, bool)
+
 
 # Mensajes de error comunes.
 ERROR_MSG_INVALID_DIMENSION_INDEX = lambda context, dim, max_dim: f"{context}: Índice de dimensión inválido {dim}. Debe estar entre 0 y {max_dim-1}."
 ERROR_MSG_INVALID_DISTANCE = lambda context, dist: f"{context}: Distancia inválida {dist}. Debe ser un número no negativo."
 ERROR_MSG_PARAM_INVALID_POINT = "El parámetro no es un objeto Point válido."
 ERROR_MSG_PARAM_INVALID_CUBE = "El parámetro no es un objeto Cube válido."
+
 
 class _Node:
     """
@@ -207,21 +230,21 @@ class _Node:
     """
     def __init__(self, points, dimensionality, depth=0):
         self._depth = depth
-        self._K = dimensionality # Dimensionalidad del espacio.
+        self._K = dimensionality  # Dimensionalidad del espacio.
         self._point = None
         self._size = 0
         self._left = None
         self._right = None
 
-        if not points: # Nodo vacío.
+        if not points:  # Nodo vacío.
             pass
-        elif len(points) == 1: # Nodo hoja.
+        elif len(points) == 1:  # Nodo hoja.
             self._point = points[0]
             self._size = 1
             # Los hijos son nodos vacíos.
             self._left = _Node.Empty(dimensionality, depth + 1)
             self._right = _Node.Empty(dimensionality, depth + 1)
-        else: # Nodo interno.
+        else:  # Nodo interno.
             # Determina la dimensión de división.
             current_dim = self.dim
 
@@ -303,20 +326,20 @@ class _Node:
         if self.isEmpty():
             return False
 
-        if self._point.equals(point_to_check):
+        if self._point == point_to_check:
             return True
         else:
             current_dim = self.dim
             coord_to_check = point_to_check.coordinate(current_dim)
             coord_node = self._point.coordinate(current_dim)
 
-            if coord_to_check <= coord_node:
+            if coord_to_check < coord_node:
                 branch = self._left
             else:
                 branch = self._right
 
             if branch:
-                 return branch.contains(point_to_check)
+                return branch.contains(point_to_check)
             return False
 
     def add(self, point_to_add):
@@ -331,15 +354,15 @@ class _Node:
                 self._K = point_to_add.dimensionality
             return True
 
-        if self._point.equals(point_to_add):
-            return False # El punto ya existe.
+        if self._point == point_to_add:
+            return False  # El punto ya existe.
 
         current_dim = self.dim
         coord_to_add = point_to_add.coordinate(current_dim)
         coord_node = self._point.coordinate(current_dim)
 
         added = False
-        if coord_to_add <= coord_node:
+        if coord_to_add < coord_node:
             added = self._left.add(point_to_add)
         else:
             added = self._right.add(point_to_add)
@@ -365,15 +388,12 @@ class _Node:
         deleted = False
         current_dim_idx = self.dim
 
-        if self._point.equals(point_to_delete):
+        if self._point == point_to_delete:
             deleted = True
             if self.isLeaf():
                 self._eraseLeaf()
             else:
                 # Si se elimina un nodo interno, se busca un reemplazo.
-                # Usualmente, el mínimo del subárbol derecho o el máximo del izquierdo.
-                # La eliminación en K-d trees puede ser compleja y desbalancear el árbol.
-                # Esta es una implementación simplificada.
                 replacement_node = None
                 if not self._right.isEmpty():
                     replacement_node = self._right.findMinNode(current_dim_idx)
@@ -383,23 +403,26 @@ class _Node:
                     replacement_node = self._left.findMaxNode(current_dim_idx)
                     self._point = replacement_node.point
                     self._left.delete(replacement_node.point)
-                else: # Era una hoja, ya manejado.
+                else:  # Era una hoja, ya manejado.
                     self._eraseLeaf()
 
-        else: # Buscar en subárboles.
+        else:  # Buscar en subárboles.
             key_func = _Node.keyByDim(current_dim_idx)
             coord_to_delete = key_func(point_to_delete)
             coord_node = key_func(self._point)
 
-            if coord_to_delete <= coord_node:
-                if self._left: deleted = self._left.delete(point_to_delete)
+            if coord_to_delete < coord_node:
+                if self._left:
+                    deleted = self._left.delete(point_to_delete)
             else:
-                if self._right: deleted = self._right.delete(point_to_delete)
+                if self._right:
+                    deleted = self._right.delete(point_to_delete)
 
         if deleted and self._point is not None:
             self._size -= 1
-            if self._size < 0: self._size = 0
-            if self._size == 0: # Nodo se volvió vacío.
+            if self._size < 0:
+                self._size = 0
+            if self._size == 0:  # Nodo se volvió vacío.
                 self._point = None
                 self._left = None
                 self._right = None
@@ -471,7 +494,7 @@ class _Node:
         node_coord = self._point.coordinate(current_dim_val)
         target_coord = target_point.coordinate(current_dim_val)
 
-        if target_coord <= node_coord:
+        if target_coord < node_coord:
             closest_branch = self._left
             further_branch = self._right
         else:
@@ -500,7 +523,7 @@ class _Node:
         node_coord = self._point.coordinate(current_dim_val)
         center_coord = center_point.coordinate(current_dim_val)
 
-        if center_coord <= node_coord:
+        if center_coord < node_coord:
             closest_branch = self._left
             further_branch = self._right
         else:
@@ -529,6 +552,7 @@ class _Node:
         current_dim_val = self.dim
         node_coord = self._point.coordinate(current_dim_val)
 
+        # Región del hijo izquierdo: top coord en dimensión 'current_dim_val' se fija en node_coord
         if self._left:
             left_child_region_top_coords = list(current_node_region.top.coordinates)
             left_child_region_top_coords[current_dim_val] = node_coord
@@ -536,6 +560,7 @@ class _Node:
             if target_region.intersects(left_child_region):
                 yield from self._left.pointsInRegion(target_region, left_child_region)
 
+        # Región del hijo derecho: bottom coord en dimensión 'current_dim_val' se fija en node_coord
         if self._right:
             right_child_region_bottom_coords = list(current_node_region.bottom.coordinates)
             right_child_region_bottom_coords[current_dim_val] = node_coord
@@ -552,6 +577,7 @@ class _Node:
             if self._right:
                 yield from self._right
 
+
 class KdTree:
     """
     Modela la API de un KdTree.
@@ -565,7 +591,7 @@ class KdTree:
         if points is None:
             points = []
 
-        self._K = None # Dimensionalidad.
+        self._K = None  # Dimensionalidad.
 
         if points:
             Point.validatePointArray(points, None, 'KdTree.__init__')
@@ -580,9 +606,9 @@ class KdTree:
     def contains(self, point):
         """Comprueba si un punto está en el árbol."""
         if self._K is not None:
-             Point.validatePoint(point, self.dimensionality, 'KdTree.contains')
+            Point.validatePoint(point, self.dimensionality, 'KdTree.contains')
         elif not isinstance(point, Point):
-             raise TypeError(ERROR_MSG_PARAM_INVALID_POINT)
+            raise TypeError(ERROR_MSG_PARAM_INVALID_POINT)
 
         if self._root.isEmpty() and self._K is None:
             return False
@@ -596,7 +622,7 @@ class KdTree:
         if not isinstance(point, Point):
             raise TypeError(ERROR_MSG_PARAM_INVALID_POINT)
 
-        if self._K is None: # Primer punto, define K.
+        if self._K is None:  # Primer punto, define K.
             self._K = point.dimensionality
             self._root._K = self._K
             added = self._root.add(point)
@@ -607,7 +633,8 @@ class KdTree:
 
     def delete(self, point):
         """Elimina un punto del árbol."""
-        if self.isEmpty(): return False
+        if self.isEmpty():
+            return False
         Point.validatePoint(point, self.dimensionality, 'KdTree.delete')
         deleted = self._root.delete(point)
         return deleted
@@ -633,7 +660,8 @@ class KdTree:
 
     def findMin(self, search_dim):
         """Encuentra el punto con el valor mínimo en una dimensión."""
-        if self.isEmpty(): return None
+        if self.isEmpty():
+            return None
         if not isinstance(search_dim, int) or not (0 <= search_dim < self.dimensionality):
             raise TypeError(ERROR_MSG_INVALID_DIMENSION_INDEX('KdTree.findMin', search_dim, self.dimensionality))
         node = self._root.findMinNode(search_dim)
@@ -641,7 +669,8 @@ class KdTree:
 
     def findMax(self, search_dim):
         """Encuentra el punto con el valor máximo en una dimensión."""
-        if self.isEmpty(): return None
+        if self.isEmpty():
+            return None
         if not isinstance(search_dim, int) or not (0 <= search_dim < self.dimensionality):
             raise TypeError(ERROR_MSG_INVALID_DIMENSION_INDEX('KdTree.findMax', search_dim, self.dimensionality))
         node = self._root.findMaxNode(search_dim)
@@ -649,14 +678,16 @@ class KdTree:
 
     def nearestNeighbour(self, point):
         """Encuentra el vecino más cercano a un punto dado."""
-        if self.isEmpty(): return None
+        if self.isEmpty():
+            return None
         Point.validatePoint(point, self.dimensionality, 'KdTree.nearestNeighbour')
         nn, _ = self._root.nearestNeighbour(point)
         return nn
 
     def pointsWithinDistanceFrom(self, point, distance):
         """Selecciona puntos dentro de una hiperesfera."""
-        if self.isEmpty(): return iter([])
+        if self.isEmpty():
+            return iter([])
         Point.validatePoint(point, self.dimensionality, 'KdTree.pointsWithinDistanceFrom')
         if not is_number(distance) or distance < 0:
             raise TypeError(ERROR_MSG_INVALID_DISTANCE('KdTree.pointsWithinDistanceFrom', distance))
@@ -664,7 +695,8 @@ class KdTree:
 
     def pointsInRegion(self, target_region):
         """Selecciona puntos dentro de un hipercubo."""
-        if self.isEmpty(): return iter([])
+        if self.isEmpty():
+            return iter([])
         Cube.validateCube(target_region, self.dimensionality, 'KdTree.pointsInRegion')
         initial_space_region = Cube.R(self.dimensionality)
         yield from self._root.pointsInRegion(target_region, initial_space_region)
@@ -678,8 +710,9 @@ class KdTree:
         """Representación de cadena del árbol."""
         return f"<KdTree size={self.size} dims={self.dimensionality}>"
 
-#Código de pruebas
-print("Inicializando pruebas del KdTree:")
+
+# Código de pruebas 
+print("--- Inicializando pruebas del KdTree ---")
 points_2d = [Point([2, 3]), Point([5, 4]), Point([9, 6]), Point([4, 7]), Point([8, 1]), Point([7, 2])]
 tree_2d = KdTree(points_2d)
 print(f"Árbol creado: {tree_2d}, Altura: {tree_2d.height}")
@@ -692,4 +725,4 @@ region = Cube(Point([4, 4]), Point([7, 8]))
 print(f"Puntos en {region}: {list(tree_2d.pointsInRegion(region))}")
 tree_2d.delete(Point([9, 6]))
 print(f"Eliminado Point([9, 6]), ¿Contiene? {tree_2d.contains(Point([9, 6]))}, Nuevo tamaño: {tree_2d.size}")
-print("Pruebas finalizadas.")
+print(" Pruebas finalizadas ")
