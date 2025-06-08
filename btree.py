@@ -83,7 +83,7 @@ class BTreeNode(Generic[K]):
         # Insertar z y la clave mediana en el nodo actual
         self.children.insert(i + 1, z)
         self.keys.insert(i, median)
-        logger.debug(f"Split child índice={i}, mediana={median}")
+        logger.debug(f"índice hijo dividido={i}, mediana={median}")
 
     def insert_non_full(self, k: K) -> None:
         """
