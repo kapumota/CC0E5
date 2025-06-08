@@ -2,7 +2,7 @@ import math
 
 class Point:
     """
-    Representa un punto en un espacio k-dimensional.
+    Representa un punto en un espacio k-dimensional 
     """
     def __init__(self, coordinates):
         """
