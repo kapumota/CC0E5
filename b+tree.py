@@ -312,4 +312,5 @@ def test_odd_even_order_behavior():
         assert arbol.validate()
 
 if __name__ == '__main__':
-    pytest.main(['-q'])
+    import pytest, sys
+    sys.exit(pytest.main(["-v", __file__]))
