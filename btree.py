@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 # Excepciones propias para el Árbol B
 class BTreeError(Exception):
-    """Excepción base para errores en BTree."""
+    """Excepción base para errores en B-Tree."""
     pass
 
 class BTreeKeyError(BTreeError, KeyError):
