@@ -4,9 +4,9 @@
 Un k-d tree es esencialmente un árbol de búsqueda binaria cuyos elementos son puntos en un espacio k-dimensional. Para que funcione correctamente, debe cumplir cuatro invariantes:
 
 1. **Dimensión uniforme**: todos los puntos almacenados tienen exactamente `k` coordenadas.
-2. **Coordenada de división por nivel**: cada nivel del árbol está asociado a un índice j, entre 0 y k−1.
-3. **Alternancia de la coordenada**: si un nodo N usa la coordenada j, sus hijos utilizarán (j+1) mod k.
-4. **Orden en subárboles**: para un nodo N con índice j, todos los puntos L en el subárbol izquierdo satisfacen L\[j] < N\[j], mientras que los puntos R en el subárbol derecho cumplen R\[j] ≥ N\[j].
+2. **Coordenada de división por nivel**: cada nivel del árbol está asociado a un índice `j`, entre `0` y `k-1`.
+3. **Alternancia de la coordenada**: si un nodo N usa la coordenada `j`, sus hijos utilizarán `(j+1) mod k`.
+4. **Orden en subárboles**: para un nodo `N` con índice `j`, todos los puntos `L` en el subárbol izquierdo satisfacen L\[j] < N\[j], mientras que los puntos `R` en el subárbol derecho cumplen R\[j] ≥ N\[j].
 
 Estos invariantes garantizan que, al descender por el árbol, se va "cortando" el espacio en hiperplanos ortogonales según la coordenada correspondiente al nivel, de forma análoga a cómo un BST usa la única clave para particionar.
 
@@ -43,7 +43,7 @@ Para implementar un k-d tree necesitamos dos clases: un nodo que almacena un pun
 > ```
 >
 > * **KdNode**: guarda el punto k-dimensional, punteros a los hijos izquierdo y derecho, y el nivel (que determina la coordenada de división).
-> * **KdTree**: contiene solo el puntero a la raíz y el valor k. Su constructor puede recibir una lista inicial de puntos, pero habitualmente comienza con la raíz en null.
+> * **KdTree**: contiene solo el puntero a la raíz y el valor `k`. Su constructor puede recibir una lista inicial de puntos, pero habitualmente comienza con la raíz en `null`.
 
 
 **4. Funciones auxiliares para comparar coordenadas**
@@ -66,7 +66,7 @@ En lugar de duplicar la lógica de "extraer la coordenada apropiada según el ni
 >   return abs(getPointKey(point, node.level) - getNodeKey(node))
 > ```
 >
-> * `getNodeKey` y `getPointKey` devuelven el componente j-ésimo (j = level mod k) de un punto.
+> * `getNodeKey` y `getPointKey` devuelven el componente j-ésimo (`j = level mod k`) de un punto.
 > * `compare` retorna -1, 0 o +1 según la comparación entre la coordenada del punto buscado y la del nodo en ese nivel.
 > * `splitDistance` calcula la "distancia" al hiperplano de división, útil más adelante en operaciones como búsqueda de vecinos.
 
@@ -117,7 +117,7 @@ Insertar en un k-d tree sigue el mismo patrón de "buscar la posición" que en u
 > * Si se detecta un duplicado, simplemente lo ignoramos (pero se pueden adoptar políticas alternativas).
 > * Este enfoque no reutiliza `search`, pero permite un código más conciso sin sacrificar claridad.
 
-**Tiempo**: igual que search, O(h).
+**Tiempo**: igual que search, `O(h)`.
 
 
 **7. Estrategias para mejorar el balance promedio**
@@ -288,7 +288,7 @@ Recorrer primero la rama "cercana" mejora la poda, porque reduce `nnDist` cuanto
 
 #### **2. Búsqueda de los n vecinos más cercanos**
 
-Para casos en que nos interesan los m vecinos más próximos, el algoritmo extiende la lógica anterior usando una cola de prioridad de tamaño acotado (max‐heap). En ella, el elemento de mayor distancia entre los m encontrados se mantiene siempre en la cima, de modo que la condición de poda compara contra ese valor límite. El pseudocódigo principal es:
+Para casos en que nos interesan los `n` vecinos más próximos, el algoritmo extiende la lógica anterior usando una cola de prioridad de tamaño acotado (max‐heap). En ella, el elemento de mayor distancia entre los `n` encontrados se mantiene siempre en la cima, de modo que la condición de poda compara contra ese valor límite. El pseudocódigo principal es:
 
 ```pseudocode
 function nNearestNeighbor(node, target, n)
@@ -322,14 +322,14 @@ function nNearestNeighbor(node, target, pq)
 **Inicialización de la cola acotada**
 
 * Se crea `pq` con capacidad `n`.
-* Se inserta un guardián `(inf, null)` para asegurar que, hasta tener al menos n elementos reales, la cima sea infinita y no provoque poda prematura.
+* Se inserta un guardián `(inf, null)` para asegurar que, hasta tener al menos `n` elementos reales, la cima sea infinita y no provoque poda prematura.
 
 **Recursión y poda**
 
 * En cada nodo, calculamos `dist` y tratamos de insertar `(dist, node.point)` en `pq`. Su política interna retiene solo las n tuplas de menor distancia.
 * Igual que en `nearestNeighbor`, definimos `closeBranch` y `farBranch` según la comparación.
 * Exploramos primero `closeBranch`, luego, tras conocer la nueva distancia al n-ésimo vecino (`pq.peek()`), decidimos si `splitDistance < nnnDist` para visitar `farBranch`.
-* Al terminar, `pq` contiene los n puntos más cercanos, ordenados por distancia.
+* Al terminar, `pq` contiene los `n` puntos más cercanos, ordenados por distancia.
 
 Este enfoque adapta la poda geométrica al caso múltiple, asegurando que solo ramas capaces de mejorar el umbral actual sean recorridas.
 
@@ -402,6 +402,6 @@ function pointsInRectangle(node, rectangle)
 * En general, el coste varía entre `O(log n)` y `O(n)`, según el tamaño y forma de la región y la capacidad de poda.
 
 
-Los k-d trees transforman búsquedas lineales en operaciones mucho más eficientes mediante particiones recursivas del espacio. La búsqueda de vecino más cercano incorpora un backtracking inteligente y poda basada en la distancia al hiperplano. La extensión a `m` vecinos utiliza colas de prioridad acotadas para mantener el umbral de poda. 
+Los k-d trees transforman búsquedas lineales en operaciones mucho más eficientes mediante particiones recursivas del espacio. La búsqueda de vecino más cercano incorpora un backtracking inteligente y poda basada en la distancia al hiperplano. La extensión a `n` vecinos utiliza colas de prioridad acotadas para mantener el umbral de poda. 
 
 Finalmente, las consultas por región (esféricas o rectangulares) reutilizan la misma idea de poda geométrica para incluir solo los nodos relevantes. Aunque en el peor caso algunos costosos recorridos completos pueden ser necesarios, en la práctica y para dimensiones moderadas (k ≤ 10) y árboles balanceados, estas operaciones son muy superiores a la fuerza bruta, ofreciendo tiempos cercanos a `O(log n)` o amortizados `O(2ᵏ + log n)`.
