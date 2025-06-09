@@ -270,7 +270,7 @@ function nearestNeighbor(node, target, (nnDist, nn) = (inf, null))
     return (nnDist, nn)
 ```
 
-**Explicación paso a paso**
+**Explicación paso a paso:**
 
 * **Condición base**: si el nodo es nulo, regresamos el par `(nnDist, nn)` tal como está, pues no hay nada nuevo que explorar.
 * **Cálculo de distancia**: se mide la distancia euclidiana (o la métrica que corresponda) entre el punto del nodo y el objetivo.
