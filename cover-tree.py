@@ -245,7 +245,6 @@ class CoverTree:
             curr = curr.parent
 
     # Los métodos de persistencia (save/load) permanecen sin cambios
-    # con respecto a la versión anterior, ya que eran robustos.
     def save(self, path: str, format: str='pickle') -> None:
         if format == 'pickle':
             dist_func = self.distance
