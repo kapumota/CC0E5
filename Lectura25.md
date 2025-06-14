@@ -1,9 +1,11 @@
 ## **B-, B+ y los R-Tree**
 
-En el ámbito de la gestión de datos a gran escala, la eficiencia de la búsqueda es un pilar fundamental. Cuando los conjuntos de datos no solo son masivos, sino que también poseen múltiples dimensiones, las estructuras de datos convencionales se vuelven insuficientes. Este análisis se sumerge en la mecánica interna de tres arquitecturas de datos avanzadas que han sido cruciales para superar estos desafíos: los **B-trees**, su variante optimizada los **B+-trees**, y su generalización para el espacio multidimensional, los **R-trees**.
+En el ámbito de la gestión de datos a gran escala, la eficiencia de la búsqueda es un pilar fundamental. Cuando los conjuntos de datos no solo son masivos, sino que también poseen múltiples dimensiones, las estructuras de datos convencionales se vuelven insuficientes. 
+
+Este análisis se sumerge en la mecánica interna de tres arquitecturas de datos avanzadas que han sido cruciales para superar estos desafíos: los **B-trees**, su variante optimizada los **B+trees**, y su generalización para el espacio multidimensional, los **R-trees**.
 
 
-### **B-Trees y B+-Trees**
+### **B-Trees y B+ Trees**
 
 Para comprender las soluciones a problemas multidimensionales, primero es indispensable dominar los B-trees, ya que los R-trees son una evolución directa de sus principios. Desarrollados para optimizar el acceso a datos en dispositivos de almacenamiento secundario como los discos duros, donde los tiempos de acceso son órdenes de magnitud más lentos que en la memoria principal, su diseño se centra en minimizar las costosas operaciones de entrada/salida (E/S). Esto lo logran manteniendo una estructura de árbol ancha y perfectamente equilibrada.
 
@@ -90,7 +92,7 @@ y veremos cómo evoluciona el árbol.
        [5 | 6 | 10 | 12 | 20]
 ```
 
-**Insertar 30 -> **split** ("desbordamiento")
+**Insertar 30** -> **split** ("desbordamiento")
 
 * Al agregar 30, la raíz tendría 6 claves $[5,6,10,12,20,30]$, lo cual excede $2d-1=5$.
 * **Dividimos** el nodo en dos y promovemos la clave central:
@@ -189,15 +191,15 @@ lo cual se refleja en nuestro árbol real con $h=1$.
 
 ### **B+ Trees**
 
-Los B+-trees son una variante de los B-trees que introduce una separación funcional entre los nodos internos y los nodos hoja, lo cual aporta optimizaciones significativas, especialmente en el contexto de las bases de datos.
+Los B+ trees son una variante de los B-trees que introduce una separación funcional entre los nodos internos y los nodos hoja, lo cual aporta optimizaciones significativas, especialmente en el contexto de las bases de datos.
 
 **Diferencias fundamentales e invariantes adicionales:**
 
-1. **Contenido de nodos internos**: Los nodos internos de un B+-tree almacenan únicamente claves. Estas claves actúan como un mapa o guía para dirigir eficientemente la búsqueda hacia la hoja correcta, sin contener los datos asociados. Esto resulta en nodos internos más ligeros y compactos, permitiendo que una mayor parte del índice quepa en la memoria caché.
+1. **Contenido de nodos internos**: Los nodos internos de un B+ tree almacenan únicamente claves. Estas claves actúan como un mapa o guía para dirigir eficientemente la búsqueda hacia la hoja correcta, sin contener los datos asociados. Esto resulta en nodos internos más ligeros y compactos, permitiendo que una mayor parte del índice quepa en la memoria caché.
 2. **Contenido de nodos hoja**: Todos los datos (o, más comúnmente, punteros a los datos) residen de forma exclusiva en los nodos hoja. Por lo tanto, si el árbol indexa `n` ítems, habrá exactamente `n` registros en el nivel de las hojas. Las claves en los nodos internos son duplicados de claves que también se encuentran en las hojas.
-3. **Lista enlazada de hojas**: Los nodos hoja están conectados secuencialmente entre sí, formando una lista enlazada. Esta es una de las ventajas más potentes de los B+-trees, ya que permite realizar recorridos de rango (ej. "buscar todos los empleados con salarios entre 50.000 y 60.000") de manera extremadamente eficiente. Una vez que se localiza el inicio del rango, se puede simplemente seguir los punteros de la lista enlazada a través de las hojas, sin necesidad de navegar nuevamente por la estructura del árbol.
+3. **Lista enlazada de hojas**: Los nodos hoja están conectados secuencialmente entre sí, formando una lista enlazada. Esta es una de las ventajas más potentes de los B+ trees, ya que permite realizar recorridos de rango (ej. "buscar todos los empleados con salarios entre 50.000 y 60.000") de manera extremadamente eficiente. Una vez que se localiza el inicio del rango, se puede simplemente seguir los punteros de la lista enlazada a través de las hojas, sin necesidad de navegar nuevamente por la estructura del árbol.
 
-#### **Operaciones en B-Trees y B+-Trees**
+#### **Operaciones en B-Trees y B+ Trees**
 
 Las operaciones de inserción y eliminación están diseñadas para preservar rigurosamente los invariantes del árbol a través de mecanismos de división y fusión de nodos.
 
@@ -222,7 +224,7 @@ Las operaciones de inserción y eliminación están diseñadas para preservar ri
 
 #### **Ejemplo**
 
-Veamo un ejemplo paso a paso, muy detallado, de las operaciones de **inserción** y **eliminación** en un **B-Tree** y su contraparte en **B⁺-Tree**, ambos de orden mínimo $d=2$. Esto significa:
+Veamo un ejemplo paso a paso, muy detallado, de las operaciones de **inserción** y **eliminación** en un **B-Tree** y su contraparte en **B+ Tree**, ambos de orden mínimo $d=2$. Esto significa:
 
 * Cada nodo (salvo la raíz) debe tener entre $d-1=1$ y $2d-1=3$ claves.
 * La raíz puede tener de 1 a 3 claves.
@@ -402,7 +404,7 @@ Las diferencias principales:
       ┌───────────────────┐   ┌─────────────────┐
       │5|6|7|10│──► hoja1  │   │12|17|20|30│ hoja2 │
       └───────────────────┘   └─────────────────┘
-               ⬍── enlace hacia ->⠀
+               |── enlace hacia ->⠀
    ```
 
    * Los nodos internos `[10|20]` sólo guían la búsqueda.
@@ -428,11 +430,8 @@ Las diferencias principales:
 
 
 ### **R-Trees**
-Aquí tienes el mismo texto con los bloques de pseudocódigo reindentados y anotados para que resulten más legibles, y a continuación un ejemplo paso a paso de construcción de un R-Tree de parámetros $m=2, M=4$.
 
----
-
-Mientras los B-trees gestionan datos unidimensionales con maestría, los datos del mundo real, como coordenadas geográficas o vectores de características de imágenes, son inherentemente multidimensionales. Los **R-trees** adaptan la estructura jerárquica y balanceada de los B+-trees para indexar eficientemente objetos en un espacio k-dimensional.
+Mientras los B-trees gestionan datos unidimensionales con maestría, los datos del mundo real, como coordenadas geográficas o vectores de características de imágenes, son inherentemente multidimensionales. Los **R-trees** adaptan la estructura jerárquica y balanceada de los B+ trees para indexar eficientemente objetos en un espacio k-dimensional.
 
 La estrategia central de un R-tree es agrupar objetos espaciales cercanos (sean puntos, líneas o polígonos) y representar a cada grupo en el nivel superior del árbol mediante su **rectángulo mínimo de delimitación** (Minimum Bounding Rectangle o MBR).
 
@@ -628,12 +627,12 @@ En la práctica, los parámetros de porcentaje de reinserción y el número de p
 
 Con estos refinamientos, las divisiones de R-trees pasan de reglas sencillas a algoritmos que equilibran perímetro, solapamiento y redistribución dinámica, logrando estructuras más compactas y búsquedas más rápidas en entornos dinámicos y de alta dimensionalidad.
 
-#### **Variantes de B+-Trees para entornos in-memory**
+#### **Variantes de B+ Trees para entornos in-memory**
 
 Con el paso del almacenamiento en disco a la RAM, el reto deja de ser la E/S y pasa a ser la jerarquía de caché de la CPU. 
-Para optimizar los B+-trees en memoria, primero se ajusta el tamaño de cada nodo al de una línea de caché (por ejemplo 64 B), de modo que un solo fallo cargue el nodo completo. Luego, se aprovecha el prefetching: al recorrer rangos, se anticipan lecturas de nodos hoja enlazados y se emiten instrucciones `PREFETCH` para minimizar esperas.
+Para optimizar los B+ trees en memoria, primero se ajusta el tamaño de cada nodo al de una línea de caché (por ejemplo 64 B), de modo que un solo fallo cargue el nodo completo. Luego, se aprovecha el prefetching: al recorrer rangos, se anticipan lecturas de nodos hoja enlazados y se emiten instrucciones `PREFETCH` para minimizar esperas.
 
-Más allá de estos ajustes "cache-aware", entran en juego los diseños **cache-oblivious** como el layout van Emde Boas o las Funnelsort trees, que reordenan recursivamente los nodos para maximizar la localidad en todas las capas de memoria sin necesidad de parámetros de caché. Para reducir aún más la sobrecarga, variantes como CSB+-trees agrupan hijos en bloques contiguos y comprimen punteros usando offsets relativos, lo que permite almacenar más claves por línea. Finalmente, estructuras híbridas tipo Fractal Tree o Bε-tree agrupan inserciones en buffers que caben en caché, logrando escrituras muy rápidas sin penalizar las búsquedas. De este modo, los B+-trees in-memory combinan alineación precisa, prefetching inteligente, layouts oblivious y compresión de punteros para explotar al máximo la RAM y las múltiples capas de caché.
+Más allá de estos ajustes "cache-aware", entran en juego los diseños **cache-oblivious** como el layout van Emde Boas o las Funnelsort trees, que reordenan recursivamente los nodos para maximizar la localidad en todas las capas de memoria sin necesidad de parámetros de caché. Para reducir aún más la sobrecarga, variantes como CSB+ trees agrupan hijos en bloques contiguos y comprimen punteros usando offsets relativos, lo que permite almacenar más claves por línea. Finalmente, estructuras híbridas tipo Fractal Tree o Bε-tree agrupan inserciones en buffers que caben en caché, logrando escrituras muy rápidas sin penalizar las búsquedas. De este modo, los B+ trees in-memory combinan alineación precisa, prefetching inteligente, layouts oblivious y compresión de punteros para explotar al máximo la RAM y las múltiples capas de caché.
 
 #### **Estructuras híbridas R-Tree/k-d Tree**
 
