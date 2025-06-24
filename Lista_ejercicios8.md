@@ -1,7 +1,7 @@
 ### Listas de ejercicios
 
 Utiliza las implementación dadas en clase: [ss-tree](https://github.com/kapumota/CC0E5/tree/main/ss-tree), 
-[ss-tree -version1](https://github.com/kapumota/CC0E5/blob/main/ss_tree_1.py), [ss+-tree]()
+[ss-tree -version1](https://github.com/kapumota/CC0E5/blob/main/ss_tree_1.py), [ss+-tree](https://github.com/kapumota/CC0E5/blob/main/ss%2B-tree.py)
 
 
 #### Ejercicio 1: Extensión de la API y validación de tipos
