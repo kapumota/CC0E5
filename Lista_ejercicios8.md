@@ -58,7 +58,7 @@ Utiliza las implementación dadas en clase: [ss-tree](https://github.com/kapumot
 
 * Nuevos casos de test que cubran: precisión k-NN, splits correctos (la suma de tamaños de hijos = tamaño del padre), y casos de empate.
 
-#### Ejercicio 4: Implementación de eliminación y reequilibrio en SS⁺-Tree
+#### Ejercicio 4: Implementación de eliminación y reequilibrio en SS+-Tree
 
 **Objetivo**
 
@@ -83,7 +83,7 @@ Utiliza las implementación dadas en clase: [ss-tree](https://github.com/kapumot
 
 **Tareas**
 
-1. Validar que `to_json()` y `from_json()` en SS⁺-Tree preservan exactamente la topología y datos.
+1. Validar que `to_json()` y `from_json()` en SS+-Tree preservan exactamente la topología y datos.
 2. Diseñar un script `migrate_ssplus.py` que:
 
    * Lea un JSON generado con la versión actual
@@ -128,7 +128,7 @@ Utiliza las implementación dadas en clase: [ss-tree](https://github.com/kapumot
 1. Generar un Sphinx (o MkDocs) site que incluya:
 
    * Guía de instalación
-   * Tutorial paso a paso para construir un SS-Tree y un SS⁺-Tree
+   * Tutorial paso a paso para construir un SS-Tree y un SS+-Tree
    * Ejemplos de código para inserción, búsqueda, eliminación y serialización
 2. Incluir diagramas UML de clases (`Point`, `Node`, `SsTree`, `SsPlusTree`).
 3. Publicar la documentación en GitHub Pages.
@@ -184,7 +184,7 @@ Implementar un sistema de recomendación "user-based" donde vecinos se definen p
 
 1. Cargar un pequeño dataset de calificaciones (p. ej., MovieLens 100K).
 2. Para cada usuario, crear un vector de calificaciones en espacio m-dimensional (m = número de películas).
-3. Construir una SS⁺-Tree con vectores de todos los usuarios.
+3. Construir una SS+-Tree con vectores de todos los usuarios.
 4. Dado un usuario de prueba, encontrar sus k vecinos más cercanos y promediar sus calificaciones para recomendar las top-N películas.
 5. Medir precisión\@N usando hold-out de usuarios.
 
@@ -196,12 +196,12 @@ Implementar un sistema de recomendación "user-based" donde vecinos se definen p
 #### Ejercicio 11: Recuperación de imágenes similares
 
 **Objetivo**
-Indexar descriptores de imágenes (p. ej., vectores SIFT o embeddings de una CNN) en una SS⁺-Tree para consultas de contenido visual.
+Indexar descriptores de imágenes (p. ej., vectores SIFT o embeddings de una CNN) en una SS+-Tree para consultas de contenido visual.
 
 **Tareas**
 
 1. Extraer embeddings (de dimensión \~128–512) de 1 000 imágenes con un modelo preentrenado (p. ej., MobileNet).
-2. Construir una SS⁺-Tree con esos vectores.
+2. Construir una SS+-Tree con esos vectores.
 3. Diseñar un script que dado un embedding de consulta muestre las 5 imágenes más parecidas.
 4. Crear un pequeño HTML que muestre consulta y resultados lado a lado.
 
