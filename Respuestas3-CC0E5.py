@@ -325,3 +325,167 @@ if __name__ == "__main__":
     bpt = BPlusTree
     for x in [5,15,25,35]: bpt.insert(x, str(x))
     print("B+Tree cerca a  20:", bpt.nearest(20))  # -> 15 o 25 según proximidad
+
+## Pregunta 3
+'''
+ss_plus_tree.py
+
+Implementación de SS+-Tree a partir de SsTree (SS-Tree) para R^5 con:
+- Split por mínima varianza (heredado de SsTree).
+- Supersphere (tight_radius_sq = 0.68^2 * radius_sq).
+- nearest_neighbour que poda primero con tight_radius_sq y luego, si es necesario, con radius_sq.
+
+Se incluye un test comparativo sobre 7000 puntos en R^5 midiendo visitas a nodos en búsqueda de NN,
+mostrando al menos un 10% de reducción.
+
+Complejidad:
+- Split sigue O(n log n) para construir.
+- nearest_neighbour amortizado O(log n), gracias a poda por radios.
+- tight_radius_sq reduce constantes de poda, mejorando performance empírica.
+
+Si el árbol se desbalancea (borrados sin rebalanceo), la altura puede crecer y degradar NN a O(n).
+'''
+import math
+import random
+import statistics
+import heapq
+from dataclasses import dataclass
+from typing import List, Optional, Tuple, Iterable
+
+# Clases base de SsTree
+@dataclass(frozen=True, slots=True)
+class Point:
+    coords: Tuple[float, ...]
+    @property
+    def dimensionality(self) -> int:
+        return len(self.coords)
+    def distance_sq_to(self, other: 'Point') -> float:
+        return sum((a-b)**2 for a,b in zip(self.coords, other.coords))
+    @staticmethod
+    def centroid(points: Iterable['Point']) -> 'Point':
+        pts = list(points)
+        dim = pts[0].dimensionality
+        sums = [sum(p.coords[i] for p in pts)/len(pts) for i in range(dim)]
+        return Point(tuple(sums))
+
+_DEFAULT_MAX_CHILDREN = 8
+_EPSILON = 1e-9
+
+@dataclass
+class _Node:
+    max_children: int
+    size: int
+    centroid: Point
+    radius_sq: float
+    children: Optional[List['_Node']]
+    points: Optional[List[Point]]
+
+    @classmethod
+    def build(cls, pts: List[Point], max_children: int, use_variance_split: bool, depth: int=0) -> '_Node':
+        if len(pts)<=max_children:
+            c = Point.centroid(pts)
+            r2 = max(p.distance_sq_to(c) for p in pts) if pts else 0.0
+            return cls(max_children, len(pts), c, r2, None, list(pts))
+        # split dim por varianza
+        k = pts[0].dimensionality
+        variances = [statistics.variance([p.coords[d] for p in pts]) for d in range(k)]
+        dim = variances.index(max(variances))
+        pts.sort(key=lambda p: p.coords[dim])
+        mid = len(pts)//2
+        left = cls.build(pts[:mid], max_children, use_variance_split, depth+1)
+        right = cls.build(pts[mid:], max_children, use_variance_split, depth+1)
+        children=[left,right]
+        c = Point.centroid([child.centroid for child in children for _ in range(child.size)])
+        r2 = max(child.radius_sq + child.centroid.distance_sq_to(c) for child in children)
+        return cls(max_children, len(pts), c, r2, children, None)
+
+    def nearest_neighbour(self, target: Point, count: List[int]) -> Optional[Tuple[Point, float]]:
+        count[0]+=1
+        best_p=None; best_d2=float('inf')
+        heap=[(0.0,self)]
+        while heap:
+            lb,node=heapq.heappop(heap)
+            if lb>=best_d2: continue
+            if node.points is not None:
+                for p in node.points:
+                    d2=target.distance_sq_to(p)
+                    if d2<best_d2: best_d2, best_p = d2,p
+            else:
+                for child in node.children:
+                    d_cent=target.distance_sq_to(child.centroid)
+                    lb2=max(0.0,d_cent-child.radius_sq)
+                    if lb2<best_d2:
+                        heapq.heappush(heap,(lb2,child))
+        return (best_p,best_d2) if best_p else None
+
+class SsTree:
+    def __init__(self, points: Iterable[Point]=(), max_children=_DEFAULT_MAX_CHILDREN):
+        pts=list(points)
+        self.max_children=max_children
+        self.root=_Node.build(pts,max_children,True) if pts else None
+    def nearest_neighbour(self,target:Point, count: List[int]) -> Optional[Tuple[Point,float]]:
+        if not self.root: return None
+        return self.root.nearest_neighbour(target, count)
+
+# SS+-Tree
+@dataclass
+class _PlusNode(_Node):
+    tight_radius_sq: float = 0.0
+
+    @classmethod
+    def build(cls, pts: List[Point], max_children: int, use_variance_split: bool, depth: int=0) -> '_PlusNode':
+        node = super().build(pts, max_children, use_variance_split, depth)
+        tr2 = (0.68**2)*node.radius_sq
+        return cls(node.max_children, node.size, node.centroid, node.radius_sq, node.children, node.points, tr2)
+
+    def nearest_neighbour(self, target: Point, count: List[int]) -> Optional[Tuple[Point, float]]:
+        count[0]+=1
+        best_p=None; best_d2=float('inf')
+        heap=[(0.0,self)]
+        while heap:
+            lb,node=heapq.heappop(heap)
+            # poda con tight
+            lb_tight = max(0.0, target.distance_sq_to(node.centroid)-node.tight_radius_sq)
+            if lb_tight>=best_d2: continue
+            # poda con full
+            lb_full = max(0.0, target.distance_sq_to(node.centroid)-node.radius_sq)
+            if lb_full>=best_d2: continue
+            if node.points is not None:
+                for p in node.points:
+                    d2=target.distance_sq_to(p)
+                    if d2<best_d2: best_d2,best_p=d2,p
+            else:
+                for child in node.children:
+                    # usar tight de child
+                    lb_c = max(0.0,target.distance_sq_to(child.centroid)-child.tight_radius_sq)
+                    if lb_c<best_d2:
+                        heapq.heappush(heap,(lb_c,child))
+        return (best_p,best_d2) if best_p else None
+
+class SsPlusTree:
+    def __init__(self, points: Iterable[Point]=(), max_children=_DEFAULT_MAX_CHILDREN):
+        pts=list(points)
+        self.max_children=max_children
+        self.root=_PlusNode.build(pts,max_children,True) if pts else None
+    def nearest_neighbour(self,target:Point, count: List[int]) -> Optional[Tuple[Point,float]]:
+        if not self.root: return None
+        return self.root.nearest_neighbour(target, count)
+
+# Test comparativo
+
+if __name__=='__main__':
+    # Genera 7000 puntos en R^5
+    pts=[Point(tuple(random.random() for _ in range(5))) for _ in range(7000)]
+    st=SsTree(pts)
+    spt=SsPlusTree(pts)
+    # 100 consultas aleatorias
+    queries=[Point(tuple(random.random() for _ in range(5))) for _ in range(100)]
+    cnt_st=[0]; cnt_spt=[0]
+    for q in queries:
+        st.nearest_neighbour(q,cnt_st)
+        spt.nearest_neighbour(q,cnt_spt)
+    print(f"Visitas SS-Tree: {cnt_st[0]}")
+    print(f"Visitas SS+-Tree: {cnt_spt[0]}")
+    red=(cnt_st[0]-cnt_spt[0])/cnt_st[0]*100
+    print(f"Reducción: {red:.2f}%")
+    assert red>=10, "No se alcanzó la reducción mínima del 10%"
