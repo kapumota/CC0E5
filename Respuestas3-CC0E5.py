@@ -812,3 +812,259 @@ def test_query_knn_property(data):
 
 if __name__ == '__main__':
     pytest.main(['-v', __file__])
+
+## Pregunta 5
+
+
+from __future__ import annotations
+import math
+from typing import List, Optional, Tuple, Any
+import random
+
+class Rectangle:
+    """
+    Caja AABB en R^n (aquí n=2).
+    """
+    __slots__ = ("min_x", "min_y", "max_x", "max_y")
+
+    def __init__(self, min_x: float, min_y: float, max_x: float, max_y: float) -> None:
+        assert min_x <= max_x and min_y <= max_y
+        self.min_x = min_x
+        self.min_y = min_y
+        self.max_x = max_x
+        self.max_y = max_y
+
+    def enlarge(self, other: Rectangle) -> Rectangle:
+        return Rectangle(
+            min(self.min_x, other.min_x),
+            min(self.min_y, other.min_y),
+            max(self.max_x, other.max_x),
+            max(self.max_y, other.max_y),
+        )
+
+    def area(self) -> float:
+        return (self.max_x - self.min_x) * (self.max_y - self.min_y)
+
+    def distance_to_point(self, x: float, y: float) -> float:
+        dx = 0.0
+        if x < self.min_x:
+            dx = self.min_x - x
+        elif x > self.max_x:
+            dx = x - self.max_x
+        dy = 0.0
+        if y < self.min_y:
+            dy = self.min_y - y
+        elif y > self.max_y:
+            dy = y - self.max_y
+        return math.hypot(dx, dy)
+
+
+class RTreeNode:
+    __slots__ = ("is_leaf", "entries", "children", "mbr", "parent")
+
+    def __init__(self, is_leaf: bool = True, parent: Optional[RTreeNode] = None):
+        self.is_leaf = is_leaf
+        # leaf: entries = list of (Rectangle, payload)
+        # internal: children = list of RTreeNode
+        self.entries: List[Tuple[Rectangle, Any]] = []
+        self.children: List[RTreeNode] = []
+        self.mbr: Optional[Rectangle] = None
+        self.parent = parent
+
+    def update_mbr(self):
+        items: List[Rectangle]
+        if self.is_leaf:
+            items = [r for r, _ in self.entries]
+        else:
+            items = [c.mbr for c in self.children if c.mbr]
+        if not items:
+            self.mbr = None
+            return
+        m = items[0]
+        for r in items[1:]:
+            m = m.enlarge(r)
+        self.mbr = m
+
+    def add_entry(self, rect: Rectangle, payload: Any):
+        self.entries.append((rect, payload))
+        self._propagate_recalc()
+
+    def add_child(self, node: RTreeNode):
+        node.parent = self
+        self.children.append(node)
+        self._propagate_recalc()
+
+    def _propagate_recalc(self):
+        node: Optional[RTreeNode] = self
+        while node:
+            node.update_mbr()
+            node = node.parent
+
+class RTree:
+    def __init__(self, M: int = 8, m: int = 4):
+        assert m <= M // 2
+        self.M = M
+        self.m = m
+        self.root = RTreeNode(is_leaf=True)
+
+    def insert(self, rect: Rectangle, payload: Any):
+        leaf = self._choose_leaf(self.root, rect)
+        leaf.add_entry(rect, payload)
+        self._handle_overflow(leaf)
+
+    def _choose_leaf(self, node: RTreeNode, rect: Rectangle) -> RTreeNode:
+        if node.is_leaf:
+            return node
+        # pick child that needs least enlargement
+        best, best_inc = None, float("inf")
+        for c in node.children:
+            assert c.mbr
+            area_before = c.mbr.area()
+            area_after = c.mbr.enlarge(rect).area()
+            inc = area_after - area_before
+            if inc < best_inc:
+                best_inc, best = inc, c
+        return self._choose_leaf(best, rect)  # type: ignore
+
+    def _handle_overflow(self, node: RTreeNode):
+        if node.is_leaf:
+            count = len(node.entries)
+        else:
+            count = len(node.children)
+        if count <= self.M:
+            return
+        n1, n2 = self._linear_split(node)
+        if node.parent is None:
+            # create new root
+            new_root = RTreeNode(is_leaf=False)
+            new_root.add_child(n1)
+            new_root.add_child(n2)
+            self.root = new_root
+        else:
+            p = node.parent
+            # replace node by n1, n2
+            if node.is_leaf:
+                # remueve a todas las entradas
+                for e in node.entries:
+                    pass
+            p.children.remove(node)
+            p.add_child(n1)
+            p.add_child(n2)
+            self._handle_overflow(p)
+
+    def _linear_split(self, node: RTreeNode) -> Tuple[RTreeNode, RTreeNode]:
+        # Split lineal Guttman 
+        if node.is_leaf:
+            items = [(rect, payload) for rect, payload in node.entries]
+        else:
+            items = [(c.mbr, c) for c in node.children]  # type: ignore
+        dim = 2
+        best_norm_sep, best_axis, seed1, seed2 = -1, None, None, None
+        for axis in range(dim):
+        
+            lows = [(it[0].min_x if axis == 0 else it[0].min_y, i) for i, it in enumerate(items)]
+            highs = [(it[0].max_x if axis == 0 else it[0].max_y, i) for i, it in enumerate(items)]
+            low_min, i_low_min = min(lows)
+            low_max, i_low_max = max(lows)
+            high_min, i_high_min = min(highs)
+            high_max, i_high_max = max(highs)
+            width = (max(h[0] for h in highs) - min(l[0] for l in lows)) or 1.0
+            norm_sep = (low_max - high_min) / width
+            if norm_sep > best_norm_sep:
+                best_norm_sep, best_axis = norm_sep, axis
+                seed1 = items[i_low_max]
+                seed2 = items[i_high_min]
+        # construimos dos nodos
+        n1 = RTreeNode(is_leaf=node.is_leaf)
+        n2 = RTreeNode(is_leaf=node.is_leaf)
+
+        def add_to(n: RTreeNode, it):
+            if node.is_leaf:
+                rect, payload = it
+                n.entries.append((rect, payload))
+            else:
+                _, child = it
+                n.children.append(child)
+                child.parent = n
+        add_to(n1, seed1); add_to(n2, seed2)
+        # remaining
+        remaining = [it for it in items if it is not seed1 and it is not seed2]
+        for it in remaining:
+            if node.is_leaf:
+                r, _ = it
+            else:
+                r = it[0]
+            m1 = n1.mbr.enlarge(r) if n1.mbr else r
+            m2 = n2.mbr.enlarge(r) if n2.mbr else r
+            d1 = m1.area() - (n1.mbr.area() if n1.mbr else 0)
+            d2 = m2.area() - (n2.mbr.area() if n2.mbr else 0)
+            target = n1 if d1 < d2 else n2
+            add_to(target, it)
+            if len(n1.entries if node.is_leaf else n1.children) + len(remaining) - 1 == self.m:
+                for rest in remaining[remaining.index(it)+1:]:
+                    add_to(n1, rest)
+                break
+            if len(n2.entries if node.is_leaf else n2.children) + len(remaining) - 1 == self.m:
+                for rest in remaining[remaining.index(it)+1:]:
+                    add_to(n2, rest)
+                break
+        # recalc MBRs
+        n1.update_mbr(); n2.update_mbr()
+        return n1, n2
+
+    def nearest(self, x: float, y: float) -> Any:
+        best_dist = float("inf")
+        best_payload = None
+
+        def recurse(node: RTreeNode):
+            nonlocal best_dist, best_payload
+            if node.is_leaf:
+                for rect, payload in node.entries:
+                    d = rect.distance_to_point(x, y)
+                    if d < best_dist:
+                        best_dist, best_payload = d, payload
+            else:
+                lst: List[Tuple[float, RTreeNode]] = []
+                for c in node.children:
+                    assert c.mbr
+                    d = c.mbr.distance_to_point(x, y)
+                    if d <= best_dist:
+                        lst.append((d, c))
+                lst.sort(key=lambda t: t[0])
+                for d, c in lst:
+                    if d > best_dist:
+                        break
+                    recurse(c)
+
+        recurse(self.root)
+        return best_payload
+
+
+# Pruebas con pytest 
+
+def test_nearest_vs_bruteforce():
+    tree = RTree(M=8, m=4)
+    rects = []
+    # genera 100 rectángulos aleatorios en [0,100]^2 de tamaño aleatorio [1,5]
+    for i in range(100):
+        w, h = random.uniform(1,5), random.uniform(1,5)
+        x0, y0 = random.uniform(0, 100-w), random.uniform(0, 100-h)
+        rects.append((Rectangle(x0, y0, x0+w, y0+h), i))
+    # inserta con payload = índice
+    for r, idx in rects:
+        tree.insert(r, idx)
+    # prueba 10 consultas aleatorias
+    for _ in range(10):
+        qx, qy = random.uniform(0,100), random.uniform(0,100)
+        best_i, best_d = None, float("inf")
+        for r, idx in rects:
+            d = r.distance_to_point(qx, qy)
+            if d < best_d:
+                best_d, best_i = idx, d
+        found = tree.nearest(qx, qy)
+        assert found == best_i
+
+if __name__ == "__main__":
+    import pytest, sys
+    sys.exit(pytest.main([__file__]))
+
