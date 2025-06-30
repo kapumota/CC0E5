@@ -489,3 +489,326 @@ if __name__=='__main__':
     red=(cnt_st[0]-cnt_spt[0])/cnt_st[0]*100
     print(f"Reducción: {red:.2f}%")
     assert red>=10, "No se alcanzó la reducción mínima del 10%"
+
+## Pregunta 4
+
+import math
+import random
+import numpy as np
+import pickle
+import json
+from heapq import heappush, heappop
+from typing import Callable, List, Optional, Tuple, Dict, Any
+
+class CoverTree:
+    """
+    Estructura de índice CoverTree optimizada que soporta inserción/eliminación dinámica,
+    consultas k-NN eficientes y persistencia.
+
+    Técnicas:
+    - Heurística de raíz adaptable a la escala de los datos.
+    - Poda de candidatos durante la inserción para manejar datos densos.
+    - Consulta k-NN altamente optimizada con heap (A*) y vectorización NumPy.
+    - Verificación de invariantes mediante `asserts` para mayor robustez.
+    """
+
+    class Node:
+        __slots__ = ("point", "level", "children", "cover_radius", "parent")
+        def __init__(self, point: Tuple, level: int, cover_radius: float, parent: Optional['CoverTree.Node'] = None):
+            self.point = point
+            self.level = level
+            self.cover_radius = cover_radius
+            self.children: List['CoverTree.Node'] = []
+            self.parent = parent
+
+    def __init__(
+        self,
+        points: List[List[float]],
+        distance_func: Callable[[Any, Any], float],
+        base: float = 2.0
+    ):
+        """
+        Inicializa el CoverTree.
+        """
+        self.distance = distance_func
+        self.base = base
+        self._index_map: Dict[Tuple, CoverTree.Node] = {}
+        self.root: Optional[CoverTree.Node] = None
+        
+        self._initial_root_level_val = self._calculate_initial_root_level(points) if points else 10
+        
+        if points:
+            random.shuffle(points)
+            for p in points:
+                self.insert(p)
+    
+    def _calculate_initial_root_level(self, points: List[List[float]], sample_size: int = 100) -> int:
+        if len(points) < 2:
+            return 10
+        sample = random.sample(points, min(len(points), sample_size))
+        max_d = 0.0
+        for i in range(len(sample)):
+            for j in range(i + 1, len(sample)):
+                d = self.distance(sample[i], sample[j])
+                if d > max_d:
+                    max_d = d
+        return math.ceil(math.log(max_d, self.base)) if max_d > 0 else 0
+
+    def insert(self, point: List[float]) -> None:
+        tup = tuple(point)
+        if tup in self._index_map:
+            return
+
+        if self.root is None:
+            node = CoverTree.Node(tup, level=self._initial_root_level_val, cover_radius=0.0, parent=None)
+            self.root = node
+            self._index_map[tup] = node
+            return
+
+        Q_i = [self.root]
+        i = max(self.root.level, self._initial_root_level_val)
+
+        while True:
+            d_p_Qi = {node.point: self.distance(tup, node.point) for node in Q_i}
+            min_dist = min(d_p_Qi.values())
+            
+            if min_dist <= self.base ** i:
+                parents_cand = [node for node in Q_i if d_p_Qi[node.point] <= self.base ** i]
+                parent_node = min(parents_cand, key=lambda n: d_p_Qi[n.point])
+                
+                new_level = i - 1
+                new_node = CoverTree.Node(tup, level=new_level, cover_radius=0.0, parent=parent_node)
+                assert new_node.level == parent_node.level - 1, "Violación del invariante de anidamiento"
+                
+                parent_node.children.append(new_node)
+                self._index_map[tup] = new_node
+                self._update_cover_radius_on_insert(new_node)
+                return
+            
+            Q_next = []
+            for node in Q_i:
+                dist_to_node = d_p_Qi[node.point]
+                for child in node.children:
+                    if dist_to_node - child.cover_radius < self.base ** i:
+                         Q_next.append(child)
+            Q_i = Q_next
+            i -= 1
+            
+            if not Q_i:
+                 old_root = self.root
+                 new_level = old_root.level + 1
+                 new_root_cover_radius = self.distance(tup, old_root.point)
+                 new_root = CoverTree.Node(tup, level=new_level, cover_radius=new_root_cover_radius, parent=None)
+                 new_root.children.append(old_root)
+                 old_root.parent = new_root
+                 self.root = new_root
+                 self._index_map[tup] = new_root
+                 return
+
+    def _update_cover_radius_on_insert(self, node: 'CoverTree.Node'):
+        curr = node
+        parent = curr.parent
+        while parent is not None:
+            dist = self.distance(curr.point, parent.point)
+            if dist > parent.cover_radius:
+                parent.cover_radius = dist
+            curr = parent
+            parent = curr.parent
+
+    def query(self, query_point: List[float], k: int = 1) -> List[Tuple[float, List[float]]]:
+        """
+        Búsqueda k-NN optimizada con un heap de candidatos y vectorización.
+        Soporta k >= 1 y si k > n puntos, retorna todos.
+        """
+        if self.root is None:
+            return []
+
+        q_tup = tuple(query_point)
+        q_np = np.array(query_point)
+        
+        best_k: List[Tuple[float, Tuple[float, ...]]] = []
+        candidates: List[Tuple[float, CoverTree.Node]] = []
+
+        d_root = self.distance(q_tup, self.root.point)
+        heappush(best_k, (-d_root, self.root.point))
+        heappush(candidates, (max(0, d_root - self.root.cover_radius), self.root))
+
+        total_points = len(self._index_map)
+        k_eff = min(k, total_points)
+
+        while candidates:
+            bound, node = heappop(candidates)
+            if len(best_k) == k_eff and bound > -best_k[0][0]:
+                break
+
+            if node.children:
+                child_points = np.array([list(c.point) for c in node.children])
+                dists = np.linalg.norm(child_points - q_np, axis=1)
+                for c, d in zip(node.children, dists):
+                    if len(best_k) < k_eff:
+                        heappush(best_k, (-d, c.point))
+                    elif d < -best_k[0][0]:
+                        heappop(best_k)
+                        heappush(best_k, (-d, c.point))
+                    
+                    dist_k = -best_k[0][0]
+                    child_bound = max(0, d - c.cover_radius)
+                    if len(best_k) < k_eff or child_bound < dist_k:
+                        heappush(candidates, (child_bound, c))
+
+        result = sorted([(-neg, list(pt)) for neg, pt in best_k], key=lambda x: x[0])
+        return result[:k_eff]
+
+    def remove(self, point: List[float]) -> bool:
+        tup = tuple(point)
+        if tup not in self._index_map:
+            return False
+
+        node_to_remove = self._index_map.pop(tup)
+        parent = node_to_remove.parent
+
+        descendants = []
+        q = list(node_to_remove.children)
+        while q:
+            n = q.pop(0)
+            descendants.append(n)
+            q.extend(n.children)
+        
+        points_to_reinsert = [list(d.point) for d in descendants]
+        for p in points_to_reinsert:
+            self._index_map.pop(tuple(p), None)
+
+        if node_to_remove is self.root:
+            self.root = None
+        elif parent:
+            parent.children.remove(node_to_remove)
+            self._recalculate_cover_radius_upwards(parent)
+        
+        for p in points_to_reinsert:
+            self.insert(p)
+
+        return True
+
+    def _recalculate_cover_radius_upwards(self, start_node: 'CoverTree.Node'):
+        curr = start_node
+        while curr is not None:
+            if not curr.children:
+                curr.cover_radius = 0.0
+            else:
+                curr.cover_radius = max(self.distance(curr.point, c.point) for c in curr.children)
+            curr = curr.parent
+
+    def save(self, path: str, format: str='pickle') -> None:
+        if format == 'pickle':
+            dist_func = self.distance
+            self.distance = None
+            try:
+                with open(path, 'wb') as f:
+                    pickle.dump(self, f)
+            finally:
+                self.distance = dist_func
+        elif format == 'json':
+            tree_dict = {"base": self.base, "tree_structure": self._to_dict(), "initial_root_level": self._initial_root_level_val}
+            with open(path, 'w') as f:
+                json.dump(tree_dict, f, indent=2)
+        else:
+            raise ValueError("Formato no soportado. Elija 'pickle' o 'json'.")
+
+    @staticmethod
+    def load(path: str, distance_func: Callable[[Any, Any], float]) -> 'CoverTree':
+        if path.endswith(('.pkl', '.pickle', '.bin')):
+            with open(path, 'rb') as f:
+                tree = pickle.load(f)
+            tree.distance = distance_func
+            return tree
+        elif path.endswith('.json'):
+            with open(path, 'r') as f:
+                data = json.load(f)
+            tree = CoverTree([], distance_func, data["base"])
+            tree._initial_root_level_val = data.get("initial_root_level", 10)
+            struct = data.get("tree_structure")
+            if not struct or not struct.get("nodes"):
+                return tree
+            created_nodes: Dict[int, CoverTree.Node] = {}
+            for i, ndata in enumerate(struct["nodes"]):
+                node = CoverTree.Node(tuple(ndata["point"]), ndata["level"], ndata["cover_radius"])
+                created_nodes[i] = node
+                tree._index_map[node.point] = node
+            for i, ndata in enumerate(struct["nodes"]):
+                node = created_nodes[i]
+                for ci in ndata["children_indices"]:
+                    child = created_nodes[ci]
+                    child.parent = node
+                    node.children.append(child)
+            tree.root = created_nodes[struct["root_index"]]
+            return tree
+        else:
+            raise ValueError("No se pudo determinar el formato del archivo por su extensión.")
+
+    def _to_dict(self) -> Optional[Dict]:
+        if not self.root: return None
+        nodes_list = []; idx_map = {}
+        q = [self.root]; head = 0
+        while head < len(q):
+            n = q[head]; head += 1
+            if n.point not in idx_map:
+                idx_map[n.point] = len(nodes_list)
+                nodes_list.append(n)
+                q.extend(n.children)
+        serial_nodes = [
+            {"point": list(n.point), "level": n.level, "cover_radius": n.cover_radius,
+             "children_indices": [idx_map[c.point] for c in n.children]}
+            for n in nodes_list
+        ]
+        return {"nodes": serial_nodes, "root_index": idx_map[self.root.point]}
+
+# Pruebas unitarias
+
+import pytest
+from hypothesis import given, strategies as st, settings, composite
+
+def test_initial_root_level():
+    pts = [[0,0], [100,0]]
+    tree = CoverTree(pts, lambda a,b: math.dist(a,b))
+    assert tree._initial_root_level_val == 7
+
+def test_query_optimizations():
+    pts = [[i, i] for i in range(20)]
+    tree = CoverTree(pts, lambda a,b: math.dist(a,b))
+    res = tree.query([1.1, 1.1], k=2)
+    points_found = {tuple(p) for _, p in res}
+    assert (1.0, 1.0) in points_found
+    assert (2.0, 2.0) in points_found
+
+@composite
+def cover_tree_data(draw):
+    dim = draw(st.integers(min_value=1, max_value=3))
+    pt_strategy = st.tuples(*[st.floats(-100, 100) for _ in range(dim)])
+    points = draw(st.lists(pt_strategy, min_size=1, max_size=20))
+    k = draw(st.integers(min_value=1, max_value=len(points) + 5))
+    query_pt = draw(pt_strategy)
+    return dim, points, query_pt, k
+
+@given(data=cover_tree_data())
+@settings(max_examples=50)
+def test_query_knn_property(data):
+    dim, points, query_pt, k = data
+    # Construir el árbol
+    pts_list = [list(p) for p in points]
+    tree = CoverTree(pts_list, lambda a,b: math.dist(a,b))
+    # Ejecutar k-NN
+    res = tree.query(list(query_pt), k=k)
+    # Brute-force
+    brute = sorted(
+        [(math.dist(query_pt, p), list(p)) for p in points],
+        key=lambda x: x[0]
+    )
+    expected = brute[:min(k, len(points))]
+    # Comparar
+    assert len(res) == len(expected)
+    for (d_res, p_res), (d_exp, p_exp) in zip(res, expected):
+        assert pytest.approx(d_res, rel=1e-6) == d_exp
+        assert p_res == p_exp
+
+if __name__ == '__main__':
+    pytest.main(['-v', __file__])
