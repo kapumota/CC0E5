@@ -140,20 +140,9 @@ Para responder a si los SS-trees superan a k-d trees y R-trees, conviene compara
    queden "vacías" dentro de la esfera y representen espacio desperdiciado.
 * **Cálculo de distancia más sencillo**: La distancia al centro de una esfera se calcula mediante la norma Euclidiana, sin necesidad de manejar dimensiones
    independientes.Esto permite, por ejemplo, aprovechar aceleraciones de hardware o simplificar la evaluación de si un punto está dentro o fuera de la región.
-* **Volumen y crecimiento en alta dimensión**: Para un espacio k-dimensional, el volumen de una esfera de radio *r* crece con la fórmula
+* **Volumen y crecimiento en alta dimensión**: En un espacio de `k` dimensiones, el volumen de una esfera de radio `r` crece proporcionalmente al radio elevado a la k-ésima potencia, multiplicado por un factor fijo que depende de `k` (ese factor combina $\pi$ y la función gamma). Por su parte, el volumen de un cubo que mida dos veces el radio en cada dimensión crece proporcionalmente a la misma potencia del radio, pero multiplicada por dos elevado a `k`.
 
-  $$
-    V_{\mathrm{esfera}}(k, r) = \frac{\pi^{k/2}}{\Gamma\bigl(\tfrac{k}{2}+1\bigr)}\,r^k,
-  $$
-
-  mientras que el de un hipercubo de lado *2r* es
-
-  $$
-    V_{\mathrm{cubo}}(k, r) = (2r)^k.
-  $$
-
-  Dado que $\pi^{k/2}/\Gamma(\tfrac{k}{2}+1) < 2^k$ para *k* ≥ 1, el volumen de las esferas crece más lentamente que el de los cubos, especialmente para valores bajos de *k*.
-  Esto implica que, cuando los puntos forman grupos aproximadamente esféricos, las envolventes hiperesféricas minimizan el espacio muerto con mayor eficacia que los hipercubos.
+Como ese factor fijo de la esfera resulta siempre menor que dos elevado a `k` cuando la dimensión `k` es al menos uno, el volumen de la esfera crece más despacio que el volumen del cubo. En la práctica, esto implica que, cuando los puntos de los datos forman agrupaciones aproximadamente esféricas, emplear envolventes hiperesféricas genera menos espacio vacío y por tanto menos desperdicio que usar hipercubos.
 
 #### **Comportamiento en el peor caso**
 
