@@ -86,7 +86,7 @@ Si, en cambio, aceptamos el **primer** candidato y **no** retrocedemos, renuncia
 
 Para dividir un nodo (heurística **minVarianceSplit**):
 
-1. Calcular la **varianza univariada** de las coordenadas por dimensión (coste $O(kM)$).
+1. Calcular la **varianza univariada** de las coordenadas por dimensión (coste *O(kM)*).
 2. Elegir la dimensión de máxima varianza.
 3. Ordenar hijos según su valor en esa dimensión.
 4. Probar divisiones entre índices $i = m..M-m$, sumando varianzas de ambos grupos.
