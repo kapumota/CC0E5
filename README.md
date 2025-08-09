@@ -1,4 +1,4 @@
-## Notas del curso de algoritmos y estructuras de datos - CC0E5
+## Notas del curso de algoritmos y estructuras de datos avanzadas- CC0E5
 
 Este curso avanzado explora las estructuras de datos más utilizadas en el desarrollo de software moderno, así como técnicas avanzadas para optimización, búsqueda y procesamiento eficiente en diferentes contextos: memoria interna, externa, grafos y clustering. Se brindan conocimientos tanto teóricos como prácticos que permitirán comprender el rendimiento de algoritmos y estructuras aplicadas en sistemas reales.
 
